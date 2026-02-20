@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap delivers a production-ready Odoo Community deployment on DigitalOcean in four phases, moving from bare Terraform project to a fully hardened, monitored, and backed-up Odoo instance behind Nginx/SSL. Phase 1 provisions all DigitalOcean infrastructure via Terraform. Phase 2 is the core build -- hardening the host, deploying the Docker application stack, and configuring Nginx with SSL -- turning a bare droplet into a working Odoo instance. Phase 3 adds Icinga2 monitoring for operational visibility. Phase 4 completes the deployment with automated backups, tested restore procedures, and comprehensive documentation. WireGuard VPN is deferred to v2; this is a single-droplet architecture.
+This roadmap delivers a production-ready Odoo Community deployment on DigitalOcean in five phases, moving from bare Terraform project to a fully hardened, monitored, and backed-up Odoo instance behind Nginx/SSL -- verified end-to-end with real users. Phase 1 provisions all DigitalOcean infrastructure via Terraform. Phase 2 is the core build -- hardening the host, deploying the Docker application stack, and configuring Nginx with SSL -- turning a bare droplet into a working Odoo instance. Phase 3 adds Icinga2 monitoring for operational visibility. Phase 4 completes backup automation, tested restore procedures, and comprehensive documentation. Phase 5 creates real user accounts and verifies the entire system end-to-end -- confirming that every prior phase works together in production with actual users. WireGuard VPN is deferred to v2; this is a single-droplet architecture.
 
 ## Phases
 
@@ -16,6 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL
 - [ ] **Phase 3: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources
 - [ ] **Phase 4: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures
+- [ ] **Phase 5: Deployment Verification and User Setup** - Create admin and regular user accounts, verify all system components work end-to-end with real users
 
 ## Phase Details
 
@@ -82,10 +83,25 @@ Plans:
 - [ ] 04-01: TBD
 - [ ] 04-02: TBD
 
+### Phase 5: Deployment Verification and User Setup
+**Goal**: An admin and a regular user are set up in Odoo, and the entire production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, monitoring alerts, and backups all function correctly with real user accounts
+**Depends on**: Phase 4
+**Requirements**: Cross-cutting verification of all prior phases (IAC, HARD, DOCK, ODOO, PG, PROXY, MON, BACK, DOC)
+**Success Criteria** (what must be TRUE):
+  1. An admin user can log in to Odoo, access Settings, install/configure CRM and Project modules, and manage user accounts
+  2. A regular user with restricted permissions can log in, create a CRM lead, advance it through pipeline stages, and create and manage a Project with tasks -- without access to admin settings
+  3. Both users access Odoo exclusively over HTTPS with a valid SSL certificate, HTTP requests redirect to HTTPS, and the browser shows no certificate warnings
+  4. Stopping a container (Odoo or PostgreSQL) triggers a monitoring alert on the Icinga2 master, and restarting the container clears the alert -- verified live
+  5. A backup runs successfully, the backup file appears in both local storage and DO Spaces, and the backup restoration procedure is confirmed functional with the live database
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -93,3 +109,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. Hardened Application Stack | 0/3 | Not started | - |
 | 3. Monitoring | 0/1 | Not started | - |
 | 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
+| 5. Deployment Verification and User Setup | 0/1 | Not started | - |

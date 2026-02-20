@@ -180,6 +180,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOC-03 | Phase 4 | Pending |
 | DOC-04 | Phase 4 | Pending |
 
+**Phase 5 note:** Phase 5 (Deployment Verification and User Setup) introduces no new requirements. It is a cross-cutting integration verification phase that validates all 48 existing requirements work together end-to-end with real user accounts.
+
 **Coverage:**
 - v1 requirements: 48 total
 - Mapped to phases: 48
@@ -187,4 +189,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after roadmap creation*
+*Last updated: 2026-02-20 after roadmap revision (Phase 5 added)*
