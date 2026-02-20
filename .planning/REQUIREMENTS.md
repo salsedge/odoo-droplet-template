@@ -130,61 +130,61 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IAC-01 | — | Pending |
-| IAC-02 | — | Pending |
-| IAC-03 | — | Pending |
-| IAC-04 | — | Pending |
-| IAC-05 | — | Pending |
-| IAC-06 | — | Pending |
-| IAC-07 | — | Pending |
-| IAC-08 | — | Pending |
-| HARD-01 | — | Pending |
-| HARD-02 | — | Pending |
-| HARD-03 | — | Pending |
-| HARD-04 | — | Pending |
-| HARD-05 | — | Pending |
-| HARD-06 | — | Pending |
-| HARD-07 | — | Pending |
-| DOCK-01 | — | Pending |
-| DOCK-02 | — | Pending |
-| DOCK-03 | — | Pending |
-| DOCK-04 | — | Pending |
-| DOCK-05 | — | Pending |
-| DOCK-06 | — | Pending |
-| DOCK-07 | — | Pending |
-| ODOO-01 | — | Pending |
-| ODOO-02 | — | Pending |
-| ODOO-03 | — | Pending |
-| ODOO-04 | — | Pending |
-| ODOO-05 | — | Pending |
-| PG-01 | — | Pending |
-| PG-02 | — | Pending |
-| PG-03 | — | Pending |
-| PG-04 | — | Pending |
-| PROXY-01 | — | Pending |
-| PROXY-02 | — | Pending |
-| PROXY-03 | — | Pending |
-| PROXY-04 | — | Pending |
-| PROXY-05 | — | Pending |
-| MON-01 | — | Pending |
-| MON-02 | — | Pending |
-| MON-03 | — | Pending |
-| MON-04 | — | Pending |
-| MON-05 | — | Pending |
-| BACK-01 | — | Pending |
-| BACK-02 | — | Pending |
-| BACK-03 | — | Pending |
-| BACK-04 | — | Pending |
-| DOC-01 | — | Pending |
-| DOC-02 | — | Pending |
-| DOC-03 | — | Pending |
-| DOC-04 | — | Pending |
+| IAC-01 | Phase 1 | Pending |
+| IAC-02 | Phase 1 | Pending |
+| IAC-03 | Phase 1 | Pending |
+| IAC-04 | Phase 1 | Pending |
+| IAC-05 | Phase 1 | Pending |
+| IAC-06 | Phase 1 | Pending |
+| IAC-07 | Phase 1 | Pending |
+| IAC-08 | Phase 1 | Pending |
+| HARD-01 | Phase 2 | Pending |
+| HARD-02 | Phase 2 | Pending |
+| HARD-03 | Phase 2 | Pending |
+| HARD-04 | Phase 2 | Pending |
+| HARD-05 | Phase 2 | Pending |
+| HARD-06 | Phase 2 | Pending |
+| HARD-07 | Phase 2 | Pending |
+| DOCK-01 | Phase 2 | Pending |
+| DOCK-02 | Phase 2 | Pending |
+| DOCK-03 | Phase 2 | Pending |
+| DOCK-04 | Phase 2 | Pending |
+| DOCK-05 | Phase 2 | Pending |
+| DOCK-06 | Phase 2 | Pending |
+| DOCK-07 | Phase 2 | Pending |
+| ODOO-01 | Phase 2 | Pending |
+| ODOO-02 | Phase 2 | Pending |
+| ODOO-03 | Phase 2 | Pending |
+| ODOO-04 | Phase 2 | Pending |
+| ODOO-05 | Phase 2 | Pending |
+| PG-01 | Phase 2 | Pending |
+| PG-02 | Phase 2 | Pending |
+| PG-03 | Phase 2 | Pending |
+| PG-04 | Phase 2 | Pending |
+| PROXY-01 | Phase 2 | Pending |
+| PROXY-02 | Phase 2 | Pending |
+| PROXY-03 | Phase 2 | Pending |
+| PROXY-04 | Phase 2 | Pending |
+| PROXY-05 | Phase 2 | Pending |
+| MON-01 | Phase 3 | Pending |
+| MON-02 | Phase 3 | Pending |
+| MON-03 | Phase 3 | Pending |
+| MON-04 | Phase 3 | Pending |
+| MON-05 | Phase 3 | Pending |
+| BACK-01 | Phase 4 | Pending |
+| BACK-02 | Phase 4 | Pending |
+| BACK-03 | Phase 4 | Pending |
+| BACK-04 | Phase 4 | Pending |
+| DOC-01 | Phase 4 | Pending |
+| DOC-02 | Phase 4 | Pending |
+| DOC-03 | Phase 4 | Pending |
+| DOC-04 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 48 total
-- Mapped to phases: 0
-- Unmapped: 48 ⚠️
+- Mapped to phases: 48
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after initial definition*
+*Last updated: 2026-02-20 after roadmap creation*
