@@ -12,7 +12,7 @@ This roadmap delivers a production-ready Odoo Community deployment on DigitalOce
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state
+- [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
 - [ ] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL
 - [ ] **Phase 3: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources
 - [ ] **Phase 4: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures
@@ -105,7 +105,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Terraform Foundation and Compute | 1/2 | In Progress | - |
+| 1. Terraform Foundation and Compute | 1/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 0/3 | Not started | - |
 | 3. Monitoring | 0/1 | Not started | - |
 | 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
