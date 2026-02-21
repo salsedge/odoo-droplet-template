@@ -30,11 +30,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Running `terraform destroy` followed by `terraform apply` produces an identical infrastructure -- the configuration is fully reproducible
   4. `terraform output` displays the droplet public IP, volume mount path, and Spaces endpoint
   5. All environment-specific values (SSH keys, droplet size, domain, IPs) are configured via tfvars -- no hardcoded secrets in HCL files
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Terraform project scaffold (providers, backend, variables, tfvars template, .gitignore)
+- [ ] 01-02-PLAN.md -- DigitalOcean resource definitions (VPC, firewall, droplet, volume) and outputs
 
 ### Phase 2: Hardened Application Stack
 **Goal**: The provisioned droplet is PCI-DSS hardened and runs a containerized Odoo instance (CRM + Project modules) behind an Nginx reverse proxy with valid SSL -- accessible via HTTPS from the public internet
