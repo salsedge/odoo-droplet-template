@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 
 ## Current Position
 
-Phase: 1 of 5 (Terraform Foundation and Compute)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-21 -- Completed 01-01-PLAN.md (Terraform project scaffold)
+Phase: 1 of 5 (Terraform Foundation and Compute) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase Complete
+Last activity: 2026-02-21 -- Completed 01-02-PLAN.md (Compute resources and outputs)
 
-Progress: [█░░░░░░░░░] 11%
+Progress: [██░░░░░░░░] 22%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 2 min
-- Total execution time: 0.03 hours
+- Total plans completed: 2
+- Average duration: 1.5 min
+- Total execution time: 0.05 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1 - Terraform Foundation | 1 | 2 min | 2 min |
+| 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min)
-- Trend: Starting
+- Last 5 plans: 01-01 (2 min), 01-02 (1 min)
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -49,6 +49,9 @@ Recent decisions affecting current work:
 - [01-01]: Flat Terraform layout in infra/ (single file per concern, no modules)
 - [01-01]: Backend bucket hardcoded (Terraform backend blocks cannot use variables)
 - [01-01]: Env vars preferred for secrets (DIGITALOCEAN_TOKEN, AWS_ACCESS_KEY_ID/SECRET)
+- [01-02]: Separate volume_attachment resource (not inline volume_ids) for correct destroy ordering
+- [01-02]: Conditional SSH key logic: data source lookup for existing, resource upload for new
+- [01-02]: Remote-exec verifies SSH and block device only; mount verification deferred to post-attachment
 
 ### Pending Todos
 
@@ -63,5 +66,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 01-01-PLAN.md (Terraform project scaffold)
+Stopped at: Completed 01-02-PLAN.md (Compute resources and outputs) -- Phase 1 complete
 Resume file: None

@@ -9,14 +9,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure as Code
 
-- [ ] **IAC-01**: Terraform provisions DigitalOcean VPC with private networking
-- [ ] **IAC-02**: Terraform provisions DO firewall rules (SSH, HTTP, HTTPS only)
-- [ ] **IAC-03**: Terraform provisions Odoo application droplet (Ubuntu 24.04 LTS)
-- [ ] **IAC-04**: Terraform provisions and attaches DO Block Storage Volume for persistent data
+- [x] **IAC-01**: Terraform provisions DigitalOcean VPC with private networking
+- [x] **IAC-02**: Terraform provisions DO firewall rules (SSH, HTTP, HTTPS only)
+- [x] **IAC-03**: Terraform provisions Odoo application droplet (Ubuntu 24.04 LTS)
+- [x] **IAC-04**: Terraform provisions and attaches DO Block Storage Volume for persistent data
 - [x] **IAC-05**: Terraform configures DO Spaces bucket for remote state backend
 - [x] **IAC-06**: Terraform uses tfvars for environment-specific configuration (IPs, droplet sizes, SSH keys, domain)
-- [ ] **IAC-07**: Terraform executes bootstrap scripts via remote-exec provisioners
-- [ ] **IAC-08**: Terraform outputs critical info (droplet IP, volume mount path, Spaces endpoint)
+- [x] **IAC-07**: Terraform executes bootstrap scripts via remote-exec provisioners
+- [x] **IAC-08**: Terraform outputs critical info (droplet IP, volume mount path, Spaces endpoint)
 
 ### System Hardening
 
@@ -130,14 +130,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IAC-01 | Phase 1 | Pending |
-| IAC-02 | Phase 1 | Pending |
-| IAC-03 | Phase 1 | Pending |
-| IAC-04 | Phase 1 | Pending |
+| IAC-01 | Phase 1 | Complete |
+| IAC-02 | Phase 1 | Complete |
+| IAC-03 | Phase 1 | Complete |
+| IAC-04 | Phase 1 | Complete |
 | IAC-05 | Phase 1 | Complete |
 | IAC-06 | Phase 1 | Complete |
-| IAC-07 | Phase 1 | Pending |
-| IAC-08 | Phase 1 | Pending |
+| IAC-07 | Phase 1 | Complete |
+| IAC-08 | Phase 1 | Complete |
 | HARD-01 | Phase 2 | Pending |
 | HARD-02 | Phase 2 | Pending |
 | HARD-03 | Phase 2 | Pending |
