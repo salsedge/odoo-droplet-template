@@ -1,0 +1,54 @@
+# =============================================================================
+# Odoo Production Infrastructure - Terraform Variables
+# =============================================================================
+#
+# Copy this file to terraform.tfvars and fill in your values:
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# SECRETS (two separate credential sets are required):
+#
+# 1. DigitalOcean API Token (for the Terraform provider):
+#      export DIGITALOCEAN_TOKEN="your-api-token"
+#
+# 2. DO Spaces Access Keys (for the remote state backend):
+#      export AWS_ACCESS_KEY_ID="your-spaces-access-key"
+#      export AWS_SECRET_ACCESS_KEY="your-spaces-secret-key"
+#    These are DigitalOcean Spaces keys, NOT AWS credentials.
+#    Generate them at: https://cloud.digitalocean.com/account/api/spaces
+#
+# =============================================================================
+
+# DigitalOcean API Token
+# Prefer the DIGITALOCEAN_TOKEN env var above. Uncomment only as a fallback.
+# do_token = "dop_v1_your-api-token-here"
+
+# Project naming -- used as prefix for all resources
+project_name = "odoo-prod"
+
+# DigitalOcean region (nyc1 or nyc3 recommended for US East)
+region = "nyc3"
+
+# Droplet size slug (s-2vcpu-4gb = 2 vCPU, 4 GB RAM, $24/mo)
+droplet_size = "s-2vcpu-4gb"
+
+# Block Storage Volume size in GB (PostgreSQL data + Odoo filestore)
+volume_size_gb = 25
+
+# VPC CIDR range (10.100.0.0/24 is safe -- outside DO reserved blocks)
+vpc_cidr = "10.100.0.0/24"
+
+# SSH Key Configuration
+# Option A (default): Use an existing key already in your DO account
+use_existing_ssh_key = true
+ssh_key_name         = "my-deploy-key"
+
+# Option B: Upload a local public key to DO (set use_existing_ssh_key = false)
+# ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Path to your private key for SSH connections during provisioning
+ssh_private_key_path = "~/.ssh/id_ed25519"
+
+# Firewall: CIDR blocks allowed to SSH into the droplet
+# WARNING: Restrict this to your specific IP address(es) for production use.
+# Using 0.0.0.0/0 allows SSH from anywhere and is NOT recommended.
+allowed_ssh_ips = ["203.0.113.0/32"]
