@@ -13,8 +13,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **IAC-02**: Terraform provisions DO firewall rules (SSH, HTTP, HTTPS only)
 - [ ] **IAC-03**: Terraform provisions Odoo application droplet (Ubuntu 24.04 LTS)
 - [ ] **IAC-04**: Terraform provisions and attaches DO Block Storage Volume for persistent data
-- [ ] **IAC-05**: Terraform configures DO Spaces bucket for remote state backend
-- [ ] **IAC-06**: Terraform uses tfvars for environment-specific configuration (IPs, droplet sizes, SSH keys, domain)
+- [x] **IAC-05**: Terraform configures DO Spaces bucket for remote state backend
+- [x] **IAC-06**: Terraform uses tfvars for environment-specific configuration (IPs, droplet sizes, SSH keys, domain)
 - [ ] **IAC-07**: Terraform executes bootstrap scripts via remote-exec provisioners
 - [ ] **IAC-08**: Terraform outputs critical info (droplet IP, volume mount path, Spaces endpoint)
 
@@ -134,8 +134,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IAC-02 | Phase 1 | Pending |
 | IAC-03 | Phase 1 | Pending |
 | IAC-04 | Phase 1 | Pending |
-| IAC-05 | Phase 1 | Pending |
-| IAC-06 | Phase 1 | Pending |
+| IAC-05 | Phase 1 | Complete |
+| IAC-06 | Phase 1 | Complete |
 | IAC-07 | Phase 1 | Pending |
 | IAC-08 | Phase 1 | Pending |
 | HARD-01 | Phase 2 | Pending |

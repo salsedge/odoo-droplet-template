@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Terraform project scaffold (providers, backend, variables, tfvars template, .gitignore)
+- [x] 01-01-PLAN.md -- Terraform project scaffold (providers, backend, variables, tfvars template, .gitignore)
 - [ ] 01-02-PLAN.md -- DigitalOcean resource definitions (VPC, firewall, droplet, volume) and outputs
 
 ### Phase 2: Hardened Application Stack
@@ -105,7 +105,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Terraform Foundation and Compute | 0/2 | Not started | - |
+| 1. Terraform Foundation and Compute | 1/2 | In Progress | - |
 | 2. Hardened Application Stack | 0/3 | Not started | - |
 | 3. Monitoring | 0/1 | Not started | - |
 | 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
