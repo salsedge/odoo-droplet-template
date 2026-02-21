@@ -1,3 +1,8 @@
+.DS_Store
+obsidian/
+.z_notes/
+
+
 # Local .terraform directories
 .terraform/
 
