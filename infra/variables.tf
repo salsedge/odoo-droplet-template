@@ -63,6 +63,12 @@ variable "ssh_private_key_path" {
   default     = "~/.ssh/id_ed25519"
 }
 
+variable "ssh_port" {
+  description = "SSH port on the droplet. Non-standard port for security hardening (Phase 2)."
+  type        = number
+  default     = 9292
+}
+
 variable "allowed_ssh_ips" {
   description = "CIDR blocks allowed to SSH into the droplet. Restrict to your IP(s) for security."
   type        = list(string)

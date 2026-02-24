@@ -106,10 +106,10 @@ resource "digitalocean_firewall" "main" {
   name        = "${var.project_name}-fw"
   droplet_ids = [digitalocean_droplet.odoo.id]
 
-  # SSH -- restricted to operator IPs
+  # SSH -- restricted to operator IPs (non-standard port per HARD-01)
   inbound_rule {
     protocol         = "tcp"
-    port_range       = "22"
+    port_range       = tostring(var.ssh_port)
     source_addresses = var.allowed_ssh_ips
   }
 
