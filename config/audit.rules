@@ -1,0 +1,64 @@
+# /etc/audit/rules.d/99-pci-dss.rules
+# HARD-07: auditd rules for PCI-DSS 10.x compliance
+# Deployed by scripts/01-harden-host.sh
+
+# Delete all existing rules before loading
+-D
+
+# Set buffer size
+-b 8192
+
+# Failure mode: 1 = printk, 2 = panic
+-f 1
+
+# PCI-DSS 10.2.1: Log all access to audit trails
+-w /var/log/audit/ -p wa -k audit-logs
+
+# PCI-DSS 10.2.2: Log actions by root or privileged users
+-a always,exit -F arch=b64 -F euid=0 -S execve -k root-commands
+-a always,exit -F arch=b32 -F euid=0 -S execve -k root-commands
+
+# PCI-DSS 10.2.3: Log access to all audit trails
+-w /etc/audit/ -p wa -k audit-config
+-w /etc/audisp/ -p wa -k audit-config
+
+# PCI-DSS 10.2.4: Invalid logical access attempts
+-a always,exit -F arch=b64 -S open,openat -F exit=-EACCES -k access-denied
+-a always,exit -F arch=b64 -S open,openat -F exit=-EPERM -k access-denied
+-a always,exit -F arch=b32 -S open,openat -F exit=-EACCES -k access-denied
+-a always,exit -F arch=b32 -S open,openat -F exit=-EPERM -k access-denied
+
+# PCI-DSS 10.2.5: Changes to identification and authentication mechanisms
+-w /etc/passwd -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/security/ -p wa -k identity
+-w /etc/pam.d/ -p wa -k identity
+
+# PCI-DSS 10.2.6: Initialization/stopping of audit logs
+-w /sbin/auditctl -p x -k audit-tools
+-w /sbin/auditd -p x -k audit-tools
+
+# PCI-DSS 10.2.7: Creation and deletion of system-level objects
+-a always,exit -F arch=b64 -S creat,mkdir,rmdir,unlink,rename -F auid>=1000 -F auid!=4294967295 -k file-operations
+-a always,exit -F arch=b32 -S creat,mkdir,rmdir,unlink,rename -F auid>=1000 -F auid!=4294967295 -k file-operations
+
+# SSH configuration changes
+-w /etc/ssh/sshd_config -p wa -k sshd-config
+-w /etc/ssh/sshd_config.d/ -p wa -k sshd-config
+
+# Docker daemon changes
+-w /etc/docker/daemon.json -p wa -k docker-config
+-w /usr/bin/docker -p x -k docker-commands
+-w /usr/bin/dockerd -p x -k docker-commands
+
+# Firewall changes
+-w /etc/ufw/ -p wa -k firewall-config
+
+# System time changes
+-a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -k time-change
+-a always,exit -F arch=b32 -S adjtimex,settimeofday,clock_settime -k time-change
+
+# Make the configuration immutable (requires reboot to change)
+-e 2
