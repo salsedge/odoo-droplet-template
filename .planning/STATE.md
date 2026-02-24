@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Run `terraform apply` and get a fully hardened, monitored Odoo deployment with Nginx/SSL -- reproducible, secure, and production-ready from day one.
-**Current focus:** Phase 1: Terraform Foundation and Compute
+**Current focus:** Phase 2: Hardened Application Stack
 
 ## Current Position
 
-Phase: 1 of 5 (Terraform Foundation and Compute) -- COMPLETE
-Plan: 2 of 2 in current phase (all plans complete)
-Status: Phase Complete
-Last activity: 2026-02-21 -- Completed 01-02-PLAN.md (Compute resources and outputs)
+Phase: 2 of 5 (Hardened Application Stack) -- IN PROGRESS
+Plan: 0 of 3 executed in current phase (plans written, pending execution on droplet)
+Status: Plans created, ready for execution
+Last activity: 2026-02-24 -- Created all Phase 2 plans (02-01, 02-02, 02-03) with scripts and configs
 
-Progress: [██░░░░░░░░] 22%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
@@ -28,6 +28,7 @@ Progress: [██░░░░░░░░] 22%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
+| 2 - Hardened Application Stack | 0 (3 written) | - | - |
 
 **Recent Trend:**
 - Last 5 plans: 01-01 (2 min), 01-02 (1 min)
@@ -52,19 +53,30 @@ Recent decisions affecting current work:
 - [01-02]: Separate volume_attachment resource (not inline volume_ids) for correct destroy ordering
 - [01-02]: Conditional SSH key logic: data source lookup for existing, resource upload for new
 - [01-02]: Remote-exec verifies SSH and block device only; mount verification deferred to post-attachment
+- [02-01]: SSH port change in cloud firewall via Terraform variable (apply before host hardening)
+- [02-01]: Deploy user created with sudo + SSH keys (root login disabled after hardening)
+- [02-01]: fail2ban Odoo jail pre-configured but only activates when Odoo logs exist
+- [02-01]: Docker daemon iptables: false -- UFW is single source of truth for firewall
+- [02-02]: Odoo container resource limits: 2GB RAM / 1 CPU; PostgreSQL: 1.2GB / 0.5 CPU
+- [02-02]: 3 Odoo workers + 1 cron worker for 10-user workload
+- [02-02]: Backend Docker network is internal (no outbound internet from PostgreSQL)
+- [02-02]: Module init via docker compose exec with -i crm,project --stop-after-init
+- [02-03]: Two-stage Nginx config: pre-SSL for certbot, then full SSL after cert issuance
+- [02-03]: HSTS without includeSubDomains (safe for potential future subdomains)
+- [02-03]: Certbot renewal via systemd timer (not cron), twice daily with random delay
 
 ### Pending Todos
 
-None yet.
+- Execute `terraform apply` to update cloud firewall SSH port to 9292
+- SCP scripts/ and config/ to droplet and execute in order
 
 ### Blockers/Concerns
 
-- [Phase 1]: Verify Odoo 19.0 Docker image availability before writing docker-compose.yml (may need 18.0 fallback)
-- [Phase 1]: Verify DO Terraform provider version and Spaces backend config flags against current docs
+- [Phase 2]: Verify Odoo 19 Docker image availability on Docker Hub before execution (may need version pin or 18 fallback)
 - [Phase 3]: Icinga2 agent-to-master registration workflow requires coordination with existing master admin
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: Completed 01-02-PLAN.md (Compute resources and outputs) -- Phase 1 complete
+Last session: 2026-02-24
+Stopped at: Created all Phase 2 plans, scripts, and configs -- ready for execution
 Resume file: None

@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md -- Terraform project scaffold (providers, backend, variables, tfvars template, .gitignore)
-- [ ] 01-02-PLAN.md -- DigitalOcean resource definitions (VPC, firewall, droplet, volume) and outputs
+- [x] 01-02-PLAN.md -- DigitalOcean resource definitions (VPC, firewall, droplet, volume) and outputs
 
 ### Phase 2: Hardened Application Stack
 **Goal**: The provisioned droplet is PCI-DSS hardened and runs a containerized Odoo instance (CRM + Project modules) behind an Nginx reverse proxy with valid SSL -- accessible via HTTPS from the public internet
@@ -46,12 +46,12 @@ Plans:
   3. Odoo CRM and Project modules are accessible after login, the database manager UI is disabled, and `/web/database/*` routes return 403 from Nginx
   4. PostgreSQL is reachable only from the Odoo container via the Docker backend network -- it has no published ports and no outbound internet access
   5. All persistent data (PostgreSQL data directory and Odoo filestore) resides on the DO Block Storage Volume -- not on the droplet's ephemeral disk
-**Plans**: TBD
+**Plans**: 3 plans (2 waves)
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md -- Host hardening (SSH, UFW, fail2ban, sysctl, auditd, unattended-upgrades) + Docker CE installation (Wave 1)
+- [ ] 02-02-PLAN.md -- Docker Compose stack: Odoo 19 + PostgreSQL 16, dual networks, health checks, resource limits (Wave 2, depends: 02-01)
+- [ ] 02-03-PLAN.md -- Nginx reverse proxy + Let's Encrypt SSL via HTTP-01, security headers, certbot auto-renewal (Wave 2, depends: 02-01)
 
 ### Phase 3: Monitoring
 **Goal**: The Odoo host reports health status to the existing Icinga2 master -- container failures, PostgreSQL issues, and system resource exhaustion trigger alerts without manual log inspection
@@ -105,8 +105,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Terraform Foundation and Compute | 1/2 | Complete    | 2026-02-21 |
-| 2. Hardened Application Stack | 0/3 | Not started | - |
+| 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
+| 2. Hardened Application Stack | 0/3 | In progress | - |
 | 3. Monitoring | 0/1 | Not started | - |
 | 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
 | 5. Deployment Verification and User Setup | 0/1 | Not started | - |
