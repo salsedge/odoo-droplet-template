@@ -12,16 +12,19 @@ backend  = systemd
 enabled  = true
 port     = 9292
 filter   = sshd
-logpath  = /var/log/auth.log
+# Uses systemd journal (backend=systemd from DEFAULT) -- no logpath needed.
+# Ubuntu 24.04 routes auth logs to the journal, not /var/log/auth.log.
 maxretry = 5
 bantime  = 600
 
 # Odoo login failure jail -- activates once Odoo logs exist.
+# Uses 'auto' backend to poll the log file (not systemd journal).
 # fail2ban gracefully handles missing log files (no errors until file appears).
 [odoo-login]
 enabled  = true
 port     = http,https
 filter   = odoo-login
+backend  = auto
 logpath  = /mnt/odoo-prod-data/odoo-filestore/odoo-server.log
 maxretry = 5
 bantime  = 600
