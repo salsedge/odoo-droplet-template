@@ -102,7 +102,10 @@ chmod 600 "${DEPLOY_DIR}/.env"
 set -a
 source "${DEPLOY_DIR}/.env"
 set +a
-sed -i "s/ADMIN_PASSWORD_PLACEHOLDER/${ODOO_ADMIN_PASSWORD}/" "${DEPLOY_DIR}/odoo.conf"
+# Use awk to avoid sed delimiter issues with special characters in passwords
+awk -v pwd="${ODOO_ADMIN_PASSWORD}" '{gsub(/ADMIN_PASSWORD_PLACEHOLDER/, pwd); print}' \
+  "${DEPLOY_DIR}/odoo.conf" > "${DEPLOY_DIR}/odoo.conf.tmp" \
+  && mv "${DEPLOY_DIR}/odoo.conf.tmp" "${DEPLOY_DIR}/odoo.conf"
 
 # Set file permissions (HARD-06)
 chmod 644 "${DEPLOY_DIR}/docker-compose.yml"
@@ -149,21 +152,19 @@ fi
 # =============================================================================
 echo "--- Initializing Odoo with CRM and Project modules (ODOO-01) ---"
 
-# Source .env for database credentials
-set -a
-source "${DEPLOY_DIR}/.env"
-set +a
+# Stop Odoo to avoid conflicting processes during module init
+docker compose stop odoo
 
-# Run Odoo module initialization
-# The -i flag installs modules on first run. Subsequent runs skip already-installed modules.
-docker compose exec -T odoo odoo -c /etc/odoo/odoo.conf \
+# Run module init in a temporary container (db is still running)
+# --stop-after-init exits after installing; --no-http skips starting the web server
+docker compose run --rm -T odoo odoo -c /etc/odoo/odoo.conf \
   -d "${POSTGRES_DB}" \
   -i crm,project \
   --stop-after-init \
   --no-http || echo "WARNING: Module init completed with non-zero exit (may be normal on first run)"
 
-# Restart Odoo to pick up workers mode (--stop-after-init ran in single-process)
-docker compose restart odoo
+# Start Odoo in normal multi-worker mode
+docker compose up -d odoo
 
 echo ""
 echo "=== Docker Application Stack Deployed ==="
