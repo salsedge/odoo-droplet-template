@@ -106,7 +106,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
-| 2. Hardened Application Stack | 0/3 | In progress | - |
+| 2. Hardened Application Stack | 2/3 | In progress | - |
 | 3. Monitoring | 0/1 | Not started | - |
 | 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
 | 5. Deployment Verification and User Setup | 0/1 | Not started | - |

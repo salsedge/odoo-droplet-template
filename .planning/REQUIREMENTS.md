@@ -32,26 +32,26 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **DOCK-01**: Docker CE installed from official apt repository (not Ubuntu docker.io package)
 - [ ] **DOCK-02**: Docker daemon configured with `iptables: false` to prevent UFW bypass
-- [ ] **DOCK-03**: Docker Compose v2 deploys Odoo and PostgreSQL as separate services
-- [ ] **DOCK-04**: Containers run as non-root users with resource limits (CPU, memory)
-- [ ] **DOCK-05**: Docker networks isolate frontend (Nginx-Odoo) and backend (Odoo-PostgreSQL)
-- [ ] **DOCK-06**: Container health checks configured for both Odoo and PostgreSQL
+- [x] **DOCK-03**: Docker Compose v2 deploys Odoo and PostgreSQL as separate services
+- [x] **DOCK-04**: Containers run as non-root users with resource limits (CPU, memory)
+- [x] **DOCK-05**: Docker networks isolate frontend (Nginx-Odoo) and backend (Odoo-PostgreSQL)
+- [x] **DOCK-06**: Container health checks configured for both Odoo and PostgreSQL
 - [ ] **DOCK-07**: Docker log rotation configured to prevent disk exhaustion
 
 ### Odoo Application
 
-- [ ] **ODOO-01**: Odoo Community edition deployed with CRM and Project modules enabled
-- [ ] **ODOO-02**: Odoo worker count and memory limits tuned for 10-user workload
-- [ ] **ODOO-03**: Odoo database manager disabled (`list_db = False`)
-- [ ] **ODOO-04**: Odoo filestore persisted on DO Block Storage Volume
-- [ ] **ODOO-05**: Odoo admin password set and `db_manager` routes blocked in Nginx
+- [x] **ODOO-01**: Odoo Community edition deployed with CRM and Project modules enabled
+- [x] **ODOO-02**: Odoo worker count and memory limits tuned for 10-user workload
+- [x] **ODOO-03**: Odoo database manager disabled (`list_db = False`)
+- [x] **ODOO-04**: Odoo filestore persisted on DO Block Storage Volume
+- [x] **ODOO-05**: Odoo admin password set and `db_manager` routes blocked in Nginx
 
 ### PostgreSQL Database
 
-- [ ] **PG-01**: PostgreSQL 16 container with data directory on DO Block Storage Volume
-- [ ] **PG-02**: PostgreSQL tuned for 10-user workload (shared_buffers, work_mem, max_connections)
-- [ ] **PG-03**: PostgreSQL accessible only from Odoo container via Docker backend network
-- [ ] **PG-04**: PostgreSQL credentials stored in .env file with restricted file permissions
+- [x] **PG-01**: PostgreSQL 16 container with data directory on DO Block Storage Volume
+- [x] **PG-02**: PostgreSQL tuned for 10-user workload (shared_buffers, work_mem, max_connections)
+- [x] **PG-03**: PostgreSQL accessible only from Odoo container via Docker backend network
+- [x] **PG-04**: PostgreSQL credentials stored in .env file with restricted file permissions
 
 ### Reverse Proxy and SSL
 
@@ -147,20 +147,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HARD-07 | Phase 2 | Pending |
 | DOCK-01 | Phase 2 | Pending |
 | DOCK-02 | Phase 2 | Pending |
-| DOCK-03 | Phase 2 | Pending |
-| DOCK-04 | Phase 2 | Pending |
-| DOCK-05 | Phase 2 | Pending |
-| DOCK-06 | Phase 2 | Pending |
+| DOCK-03 | Phase 2 | Complete |
+| DOCK-04 | Phase 2 | Complete |
+| DOCK-05 | Phase 2 | Complete |
+| DOCK-06 | Phase 2 | Complete |
 | DOCK-07 | Phase 2 | Pending |
-| ODOO-01 | Phase 2 | Pending |
-| ODOO-02 | Phase 2 | Pending |
-| ODOO-03 | Phase 2 | Pending |
-| ODOO-04 | Phase 2 | Pending |
-| ODOO-05 | Phase 2 | Pending |
-| PG-01 | Phase 2 | Pending |
-| PG-02 | Phase 2 | Pending |
-| PG-03 | Phase 2 | Pending |
-| PG-04 | Phase 2 | Pending |
+| ODOO-01 | Phase 2 | Complete |
+| ODOO-02 | Phase 2 | Complete |
+| ODOO-03 | Phase 2 | Complete |
+| ODOO-04 | Phase 2 | Complete |
+| ODOO-05 | Phase 2 | Complete |
+| PG-01 | Phase 2 | Complete |
+| PG-02 | Phase 2 | Complete |
+| PG-03 | Phase 2 | Complete |
+| PG-04 | Phase 2 | Complete |
 | PROXY-01 | Phase 2 | Pending |
 | PROXY-02 | Phase 2 | Pending |
 | PROXY-03 | Phase 2 | Pending |

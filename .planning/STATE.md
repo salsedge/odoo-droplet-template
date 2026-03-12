@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 2 of 5 (Hardened Application Stack) -- IN PROGRESS
-Plan: 0 of 3 executed in current phase (plans written, pending execution on droplet)
-Status: Plans created, ready for execution
-Last activity: 2026-02-24 -- Created all Phase 2 plans (02-01, 02-02, 02-03) with scripts and configs
+Plan: 2 of 3 executed in current phase (02-02, 02-03 complete; 02-01 in progress)
+Status: Executing Phase 2 plans
+Last activity: 2026-03-12 -- Executed 02-03 (Nginx Reverse Proxy & SSL)
 
-Progress: [███░░░░░░░] 30%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 1.5 min
-- Total execution time: 0.05 hours
+- Total plans completed: 4
+- Average duration: 2.25 min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
-| 2 - Hardened Application Stack | 0 (3 written) | - | - |
+| 2 - Hardened Application Stack | 2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min)
-- Trend: Accelerating
+- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-02 (3 min), 02-03 (3 min)
+- Trend: Stable
 
 *Updated after each plan completion*
 
@@ -60,10 +60,15 @@ Recent decisions affecting current work:
 - [02-02]: Odoo container resource limits: 2GB RAM / 1 CPU; PostgreSQL: 1.2GB / 0.5 CPU
 - [02-02]: 3 Odoo workers + 1 cron worker for 10-user workload
 - [02-02]: Backend Docker network is internal (no outbound internet from PostgreSQL)
-- [02-02]: Module init via docker compose exec with -i crm,project --stop-after-init
+- [02-02]: Module init via docker compose run --rm (not exec) with -i crm,project --stop-after-init
+- [02-02]: Odoo 19 uses http_port/gevent_port (deprecated xmlrpc_port/longpolling_port in 17+)
+- [02-02]: awk for password injection instead of sed to handle special characters safely
 - [02-03]: Two-stage Nginx config: pre-SSL for certbot, then full SSL after cert issuance
 - [02-03]: HSTS without includeSubDomains (safe for potential future subdomains)
 - [02-03]: Certbot renewal via systemd timer (not cron), twice daily with random delay
+- [02-03]: DNS resolver (1.1.1.1/1.0.0.1) required for OCSP stapling -- added during execution
+- [02-03]: DNS pre-check before certbot prevents wasted rate-limited attempts
+- [02-03]: HTTP-01 challenge (not DNS-01) for simpler setup without DO API token
 
 ### Pending Todos
 
@@ -77,6 +82,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Created all Phase 2 plans, scripts, and configs -- ready for execution
+Last session: 2026-03-12
+Stopped at: Completed 02-03-PLAN.md (Nginx Reverse Proxy & SSL)
 Resume file: None
