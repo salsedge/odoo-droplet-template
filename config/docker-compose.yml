@@ -1,0 +1,118 @@
+# =============================================================================
+# Docker Compose — Odoo + PostgreSQL Application Stack
+# =============================================================================
+# Requirements: DOCK-03, DOCK-04, DOCK-05, DOCK-06, ODOO-01, ODOO-04, PG-01, PG-03
+#
+# Networks:
+#   frontend — host (Nginx) ↔ Odoo
+#   backend  — Odoo ↔ PostgreSQL (isolated, no external access)
+#
+# Volumes: All persistent data on Block Storage Volume at /mnt/odoo-prod-data/
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 16 — Database server
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16
+    container_name: odoo-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    volumes:
+      - /mnt/odoo-prod-data/postgres-data:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
+    networks:
+      - backend
+
+    # DOCK-04: Resource limits sized for s-2vcpu-4gb droplet
+    # PostgreSQL gets ~1.2GB RAM, 0.5 CPU
+    deploy:
+      resources:
+        limits:
+          memory: 1200M
+          cpus: "0.50"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+
+    # DOCK-06: Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    # PG-03: No published ports — backend network only
+
+  # ---------------------------------------------------------------------------
+  # Odoo 19 — Application server
+  # ---------------------------------------------------------------------------
+  odoo:
+    image: odoo:19
+    container_name: odoo-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      HOST: db
+      PORT: 5432
+      USER: ${POSTGRES_USER}
+      PASSWORD: ${POSTGRES_PASSWORD}
+      ODOO_ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
+
+    volumes:
+      - /mnt/odoo-prod-data/odoo-filestore:/var/lib/odoo
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+
+    # Localhost-only binding — only reachable from host Nginx
+    ports:
+      - "127.0.0.1:8069:8069"
+      - "127.0.0.1:8072:8072"
+
+    networks:
+      - frontend
+      - backend
+
+    # DOCK-04: Resource limits sized for s-2vcpu-4gb droplet
+    # Odoo gets ~2GB RAM, 1.0 CPU (workers handle concurrency)
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+          cpus: "1.00"
+        reservations:
+          memory: 768M
+          cpus: "0.50"
+
+    # DOCK-06: Health check
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8069/web/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+# =============================================================================
+# DOCK-05: Dual network isolation
+# =============================================================================
+networks:
+  frontend:
+    name: odoo-frontend
+    driver: bridge
+  backend:
+    name: odoo-backend
+    driver: bridge
+    internal: true

@@ -1,0 +1,27 @@
+# /etc/fail2ban/jail.local
+# HARD-03: fail2ban configuration
+# Deployed by scripts/01-harden-host.sh
+
+[DEFAULT]
+bantime  = 600
+findtime = 600
+maxretry = 5
+backend  = systemd
+
+[sshd]
+enabled  = true
+port     = 9292
+filter   = sshd
+logpath  = /var/log/auth.log
+maxretry = 5
+bantime  = 600
+
+# Odoo login failure jail -- activates once Odoo logs exist.
+# fail2ban gracefully handles missing log files (no errors until file appears).
+[odoo-login]
+enabled  = true
+port     = http,https
+filter   = odoo-login
+logpath  = /mnt/odoo-prod-data/odoo-filestore/odoo-server.log
+maxretry = 5
+bantime  = 600
