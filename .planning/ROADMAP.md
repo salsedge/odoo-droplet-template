@@ -13,7 +13,7 @@ This roadmap delivers a production-ready Odoo Community deployment on DigitalOce
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
-- [ ] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL
+- [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
 - [ ] **Phase 3: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources
 - [ ] **Phase 4: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures
 - [ ] **Phase 5: Deployment Verification and User Setup** - Create admin and regular user accounts, verify all system components work end-to-end with real users
@@ -49,9 +49,9 @@ Plans:
 **Plans**: 3 plans (2 waves)
 
 Plans:
-- [ ] 02-01-PLAN.md -- Host hardening (SSH, UFW, fail2ban, sysctl, auditd, unattended-upgrades) + Docker CE installation (Wave 1)
-- [ ] 02-02-PLAN.md -- Docker Compose stack: Odoo 19 + PostgreSQL 16, dual networks, health checks, resource limits (Wave 2, depends: 02-01)
-- [ ] 02-03-PLAN.md -- Nginx reverse proxy + Let's Encrypt SSL via HTTP-01, security headers, certbot auto-renewal (Wave 2, depends: 02-01)
+- [x] 02-01-PLAN.md -- Host hardening (SSH, UFW, fail2ban, sysctl, auditd, unattended-upgrades) + Docker CE installation (Wave 1)
+- [x] 02-02-PLAN.md -- Docker Compose stack: Odoo 19 + PostgreSQL 16, dual networks, health checks, resource limits (Wave 2, depends: 02-01)
+- [x] 02-03-PLAN.md -- Nginx reverse proxy + Let's Encrypt SSL via HTTP-01, security headers, certbot auto-renewal (Wave 2, depends: 02-01)
 
 ### Phase 3: Monitoring
 **Goal**: The Odoo host reports health status to the existing Icinga2 master -- container failures, PostgreSQL issues, and system resource exhaustion trigger alerts without manual log inspection
@@ -106,7 +106,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
-| 2. Hardened Application Stack | 2/3 | In progress | - |
+| 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
 | 3. Monitoring | 0/1 | Not started | - |
 | 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
 | 5. Deployment Verification and User Setup | 0/1 | Not started | - |
