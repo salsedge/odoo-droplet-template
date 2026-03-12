@@ -54,6 +54,24 @@ for f in nginx/odoo-pre-ssl.conf nginx/odoo.conf; do
   fi
 done
 
+# Verify DNS resolves to this server (prevents wasted certbot rate-limited attempts)
+echo "--- Verifying DNS resolution for ${DOMAIN} ---"
+RESOLVED_IP=$(dig +short "${DOMAIN}" A 2>/dev/null | tail -1)
+SERVER_IP=$(curl -s -4 ifconfig.me 2>/dev/null || curl -s -4 icanhazip.com 2>/dev/null)
+
+if [[ -z "${RESOLVED_IP}" ]]; then
+  echo "ERROR: DNS lookup for ${DOMAIN} returned no results." >&2
+  echo "  Ensure the A record is set and DNS has propagated." >&2
+  echo "  Verify with: dig ${DOMAIN}" >&2
+  exit 1
+fi
+
+if [[ "${RESOLVED_IP}" != "${SERVER_IP}" ]]; then
+  echo "WARNING: ${DOMAIN} resolves to ${RESOLVED_IP}, but this server's public IP is ${SERVER_IP}" >&2
+  echo "  Certbot HTTP-01 challenge will fail if DNS doesn't point here." >&2
+  echo "  Continuing anyway -- certbot will fail with a clear error if mismatched." >&2
+fi
+
 # =============================================================================
 # Step 1: Install Nginx and Certbot
 # =============================================================================
