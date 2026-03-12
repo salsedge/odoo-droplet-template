@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 
 ## Current Position
 
-Phase: 2 of 5 (Hardened Application Stack) -- IN PROGRESS
-Plan: 2 of 3 executed in current phase (02-02, 02-03 complete; 02-01 in progress)
-Status: Executing Phase 2 plans
-Last activity: 2026-03-12 -- Executed 02-03 (Nginx Reverse Proxy & SSL)
+Phase: 2 of 5 (Hardened Application Stack) -- COMPLETE
+Plan: 3 of 3 executed in current phase (02-01, 02-02, 02-03 all complete)
+Status: Phase 2 complete, ready for Phase 3
+Last activity: 2026-03-12 -- Executed 02-01 (Host Hardening & Docker Installation)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 2.25 min
-- Total execution time: 0.15 hours
+- Total plans completed: 5
+- Average duration: 2.4 min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
-| 2 - Hardened Application Stack | 2 | 6 min | 3 min |
+| 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-02 (3 min), 02-03 (3 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-02 (3 min), 02-03 (3 min), 02-01 (4 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -57,6 +57,10 @@ Recent decisions affecting current work:
 - [02-01]: Deploy user created with sudo + SSH keys (root login disabled after hardening)
 - [02-01]: fail2ban Odoo jail pre-configured but only activates when Odoo logs exist
 - [02-01]: Docker daemon iptables: false -- UFW is single source of truth for firewall
+- [02-01]: net.ipv4.ip_forward=1 required despite hardening -- Docker bridge networking needs it even with iptables:false
+- [02-01]: KbdInteractiveAuthentication replaces deprecated ChallengeResponseAuthentication (OpenSSH 9.6 / Ubuntu 24.04)
+- [02-01]: fail2ban sshd uses systemd journal backend (no logpath); odoo-login uses auto backend for file polling
+- [02-01]: Docker GPG key import uses --batch --yes for idempotent script re-runs
 - [02-02]: Odoo container resource limits: 2GB RAM / 1 CPU; PostgreSQL: 1.2GB / 0.5 CPU
 - [02-02]: 3 Odoo workers + 1 cron worker for 10-user workload
 - [02-02]: Backend Docker network is internal (no outbound internet from PostgreSQL)
@@ -83,5 +87,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-12
-Stopped at: Completed 02-03-PLAN.md (Nginx Reverse Proxy & SSL)
+Stopped at: Completed 02-01-PLAN.md (Host Hardening & Docker Installation) -- Phase 2 complete
 Resume file: None
