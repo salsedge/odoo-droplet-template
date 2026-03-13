@@ -56,7 +56,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Reverse Proxy and SSL
 
 - [x] **PROXY-01**: Nginx installed on host as reverse proxy to Odoo container
-- [x] **PROXY-02**: Let's Encrypt SSL certificate via certbot with DNS-01 challenge (certbot-dns-digitalocean)
+- [x] **PROXY-02**: Let's Encrypt SSL certificate via certbot with HTTP-01 challenge (--webroot)
 - [x] **PROXY-03**: Nginx enforces HTTPS redirect and HSTS headers
 - [x] **PROXY-04**: Nginx blocks access to /web/database/* routes
 - [x] **PROXY-05**: Certbot auto-renewal configured via systemd timer
