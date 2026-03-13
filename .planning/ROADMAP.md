@@ -50,7 +50,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md -- Host hardening (SSH, UFW, fail2ban, sysctl, auditd, unattended-upgrades) + Docker CE installation (Wave 1)
-- [x] 02-02-PLAN.md -- Docker Compose stack: Odoo 19 + PostgreSQL 16, dual networks, health checks, resource limits (Wave 2, depends: 02-01)
+- [x] 02-02-PLAN.md -- Docker Compose stack: Odoo 19 + PostgreSQL 18, dual networks, health checks, resource limits (Wave 2, depends: 02-01)
 - [x] 02-03-PLAN.md -- Nginx reverse proxy + Let's Encrypt SSL via HTTP-01, security headers, certbot auto-renewal (Wave 2, depends: 02-01)
 
 ### Phase 3: Monitoring

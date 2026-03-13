@@ -48,7 +48,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### PostgreSQL Database
 
-- [x] **PG-01**: PostgreSQL 16 container with data directory on DO Block Storage Volume
+- [x] **PG-01**: PostgreSQL 18 container with data directory on DO Block Storage Volume
 - [x] **PG-02**: PostgreSQL tuned for 10-user workload (shared_buffers, work_mem, max_connections)
 - [x] **PG-03**: PostgreSQL accessible only from Odoo container via Docker backend network
 - [x] **PG-04**: PostgreSQL credentials stored in .env file with restricted file permissions

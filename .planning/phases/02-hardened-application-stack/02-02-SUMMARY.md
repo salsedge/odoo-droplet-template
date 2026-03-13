@@ -9,7 +9,7 @@ requires:
   - phase: 02-hardened-application-stack/02-01
     provides: Hardened host with Docker CE installed, UFW, fail2ban
 provides:
-  - Docker Compose stack with Odoo 19 + PostgreSQL 16
+  - Docker Compose stack with Odoo 19 + PostgreSQL 18
   - Dual network isolation (frontend bridge + backend internal)
   - Health checks for both services
   - Resource-limited containers sized for s-2vcpu-4gb
@@ -19,7 +19,7 @@ affects: [02-hardened-application-stack/02-03, 03-monitoring, 04-backup-recovery
 
 # Tech tracking
 tech-stack:
-  added: [docker-compose, postgres-16, odoo-19]
+  added: [docker-compose, postgres-18, odoo-19]
   patterns: [localhost-only-binding, internal-docker-network, env-based-secrets]
 
 key-files:
@@ -52,7 +52,7 @@ completed: 2026-03-12
 
 # Phase 2 Plan 02: Docker Application Stack Summary
 
-**Odoo 19 + PostgreSQL 16 Docker Compose stack with dual-network isolation, resource limits, health checks, and Block Storage persistence**
+**Odoo 19 + PostgreSQL 18 Docker Compose stack with dual-network isolation, resource limits, health checks, and Block Storage persistence**
 
 ## Performance
 
@@ -63,7 +63,7 @@ completed: 2026-03-12
 - **Files modified:** 2
 
 ## Accomplishments
-- Verified Docker Compose configuration with Odoo 19 + PostgreSQL 16 services, dual networks, health checks, and resource limits
+- Verified Docker Compose configuration with Odoo 19 + PostgreSQL 18 services, dual networks, health checks, and resource limits
 - Fixed Odoo config for v19 parameter names (deprecated xmlrpc/longpolling replaced with http/gevent)
 - Hardened deploy script with safe password injection and proper module initialization workflow
 

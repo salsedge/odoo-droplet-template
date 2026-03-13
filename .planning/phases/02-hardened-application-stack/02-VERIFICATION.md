@@ -77,7 +77,7 @@ human_verification:
 
 | Artifact | Status | Details |
 |----------|--------|---------|
-| `config/docker-compose.yml` | VERIFIED | Odoo 19 + PostgreSQL 16; frontend/backend dual networks; backend internal:true; db has no ports section; health checks on both; resource limits (db: 1200M/0.5 CPU, odoo: 2048M/1.0 CPU); volumes to /mnt/odoo-prod-data/ |
+| `config/docker-compose.yml` | VERIFIED | Odoo 19 + PostgreSQL 18; frontend/backend dual networks; backend internal:true; db has no ports section; health checks on both; resource limits (db: 1200M/0.5 CPU, odoo: 2048M/1.0 CPU); volumes to /mnt/odoo-prod-data/ |
 | `config/.env.example` | VERIFIED | POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, ODOO_ADMIN_PASSWORD with CHANGE_ME placeholders |
 | `config/odoo.conf` | VERIFIED | list_db = False; workers = 3; max_cron_threads = 1; limit_memory_soft/hard = 805306368/1073741824; proxy_mode = True; http_port = 8069; gevent_port = 8072; data_dir = /var/lib/odoo |
 | `config/postgresql.conf` | VERIFIED | shared_buffers = 256MB; work_mem = 8MB; max_connections = 50; log_min_duration_statement = 1000 |
@@ -120,7 +120,7 @@ human_verification:
 | HARD-07 | 02-01 | auditd PCI-DSS 10.2.x | SATISFIED | audit.rules: 10.2.1-10.2.7 rules, Docker/SSH/firewall tracking, -e 2 immutable |
 | DOCK-01 | 02-01 | Docker CE from official apt repo | SATISFIED | 02-install-docker.sh: download.docker.com GPG + apt repo; installs docker-ce docker-ce-cli containerd.io docker-compose-plugin |
 | DOCK-02 | 02-01 | daemon.json with iptables: false | SATISFIED | daemon.json: "iptables": false |
-| DOCK-03 | 02-02 | Docker Compose v2 Odoo + PostgreSQL | SATISFIED | docker-compose.yml: two services (odoo:19, postgres:16) |
+| DOCK-03 | 02-02 | Docker Compose v2 Odoo + PostgreSQL | SATISFIED | docker-compose.yml: two services (odoo:19, postgres:18) |
 | DOCK-04 | 02-02 | Non-root containers with resource limits | SATISFIED | docker-compose.yml: deploy.resources.limits for both services (db: 1200M/0.5CPU, odoo: 2048M/1.0CPU) |
 | DOCK-05 | 02-02 | Dual networks (frontend + backend internal) | SATISFIED | docker-compose.yml: networks.backend.internal: true; db on backend only; odoo on frontend+backend |
 | DOCK-06 | 02-02 | Health checks on both services | SATISFIED | docker-compose.yml: pg_isready health check on db; curl /web/health on odoo |
@@ -130,7 +130,7 @@ human_verification:
 | ODOO-03 | 02-02 | list_db = False | SATISFIED | odoo.conf: list_db = False |
 | ODOO-04 | 02-02 | Filestore on Block Storage | SATISFIED | docker-compose.yml: /mnt/odoo-prod-data/odoo-filestore:/var/lib/odoo; odoo.conf: data_dir = /var/lib/odoo |
 | ODOO-05 | 02-02 | Admin password + db_manager blocked | SATISFIED | .env.example has ODOO_ADMIN_PASSWORD; deploy script injects via awk; nginx blocks /web/database |
-| PG-01 | 02-02 | PostgreSQL 16 on Block Storage | SATISFIED | docker-compose.yml: postgres:16; /mnt/odoo-prod-data/postgres-data:/var/lib/postgresql/data |
+| PG-01 | 02-02 | PostgreSQL 18 on Block Storage | SATISFIED | docker-compose.yml: postgres:18; /mnt/odoo-prod-data/postgres-data:/var/lib/postgresql/data |
 | PG-02 | 02-02 | PostgreSQL tuned for 10-user workload | SATISFIED | postgresql.conf: shared_buffers=256MB, work_mem=8MB, max_connections=50 |
 | PG-03 | 02-02 | PostgreSQL backend network only, no published ports | SATISFIED | docker-compose.yml: db has no ports section; on backend network only |
 | PG-04 | 02-02 | Credentials in .env mode 600 | SATISFIED | 03-deploy-stack.sh: cp .env to /opt/odoo/.env; chmod 600 |
