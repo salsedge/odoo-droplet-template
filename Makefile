@@ -31,7 +31,7 @@ CERT_EMAIL   ?=
 REMOTE_DIR   := /tmp/odoo-setup
 
 # Resolve droplet IP from terraform if not set
-DROPLET_IP   ?= $(shell cd infra && terraform output -raw droplet_ip 2>/dev/null)
+DROPLET_IP   ?= $(shell cd infra && AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) terraform output -raw droplet_ip 2>/dev/null)
 
 SSH_OPTS     := -o StrictHostKeyChecking=accept-new -i $(SSH_KEY)
 SSH_CMD      := ssh $(SSH_OPTS) -p $(SSH_PORT) $(SSH_USER)@$(DROPLET_IP)
@@ -68,7 +68,7 @@ tf-destroy: ## Destroy all infrastructure (interactive confirmation)
 .PHONY: upload
 upload: ## Upload config/ and scripts/ to droplet
 	@[ -n "$(DROPLET_IP)" ] || { echo "ERROR: DROPLET_IP not set and terraform output unavailable"; exit 1; }
-	$(SSH_CMD) "mkdir -p $(REMOTE_DIR)"
+	$(SSH_CMD) "sudo rm -rf $(REMOTE_DIR) && mkdir -p $(REMOTE_DIR)"
 	$(SCP_CMD) -r config/ $(SSH_USER)@$(DROPLET_IP):$(REMOTE_DIR)/
 	$(SCP_CMD) -r scripts/ $(SSH_USER)@$(DROPLET_IP):$(REMOTE_DIR)/
 	@echo "Uploaded to $(SSH_USER)@$(DROPLET_IP):$(REMOTE_DIR)"

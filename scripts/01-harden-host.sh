@@ -82,12 +82,16 @@ if ! id -u deploy &>/dev/null; then
   echo "Created deploy user with sudo and SSH key access"
 fi
 
+# Ensure privilege separation directory exists (missing on some DO images)
+mkdir -p /run/sshd
+
 # Validate sshd config before restarting
 sshd -t -f /etc/ssh/sshd_config
 echo "SSH config validated"
 
 # Restart SSH (connection on port 22 stays alive; new connections use 9292)
-systemctl restart sshd
+# Ubuntu 24.04 uses ssh.service, not sshd.service
+systemctl restart ssh
 echo "SSH restarted on port 9292"
 
 # =============================================================================

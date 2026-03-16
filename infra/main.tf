@@ -113,6 +113,16 @@ resource "digitalocean_firewall" "main" {
     source_addresses = var.allowed_ssh_ips
   }
 
+  # Temporary port 22 for initial setup (before hardening moves SSH to ssh_port)
+  dynamic "inbound_rule" {
+    for_each = var.allow_port_22 ? [1] : []
+    content {
+      protocol         = "tcp"
+      port_range       = "22"
+      source_addresses = var.allowed_ssh_ips
+    }
+  }
+
   # HTTP -- public access
   inbound_rule {
     protocol         = "tcp"

@@ -4,11 +4,7 @@
 # Secrets should be passed via environment variables (see terraform.tfvars.example).
 # -----------------------------------------------------------------------------
 
-variable "do_token" {
-  description = "DigitalOcean API token. Prefer env var: export DIGITALOCEAN_TOKEN=\"...\""
-  type        = string
-  sensitive   = true
-}
+# do_token removed — provider reads DIGITALOCEAN_TOKEN env var directly
 
 variable "project_name" {
   description = "Prefix for all resource names (droplet, VPC, firewall, volume)"
@@ -72,4 +68,10 @@ variable "ssh_port" {
 variable "allowed_ssh_ips" {
   description = "CIDR blocks allowed to SSH into the droplet. Restrict to your IP(s) for security."
   type        = list(string)
+}
+
+variable "allow_port_22" {
+  description = "Temporarily allow SSH on port 22 for initial setup (before hardening moves SSH to ssh_port). Set to false after hardening."
+  type        = bool
+  default     = false
 }
