@@ -100,6 +100,7 @@ Flat single-directory layout in `infra/` — one file per concern, no modules. R
 | Separate volume_attachment | Not inline `volume_ids` on droplet — prevents destroy-ordering issues |
 | Block Storage for all data | PostgreSQL data + Odoo filestore on DO Volume, not ephemeral disk |
 | 3 workers + 1 cron | Right-sized for 2 vCPU / 4 GB with 10 concurrent users |
+| Two Spaces buckets | `odoo-prod-tfstate` (Standard) for TF state, `odoo-prod-backups` (Cold Storage) for backups. Cold is 3x cheaper but has 30-day retention + retrieval fees. |
 
 ## Development Workflow
 

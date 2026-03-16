@@ -73,6 +73,7 @@ Recent decisions affecting current work:
 - [02-03]: DNS resolver (1.1.1.1/1.0.0.1) required for OCSP stapling -- added during execution
 - [02-03]: DNS pre-check before certbot prevents wasted rate-limited attempts
 - [02-03]: HTTP-01 challenge (not DNS-01) for simpler setup without DO API token
+- [Infra]: Two Spaces buckets — `odoo-prod-tfstate` (Standard) for TF state, `odoo-prod-backups` (Cold Storage) for Phase 4 backups. Cold Storage is 3x cheaper but has 30-day retention + retrieval fees, unsuitable for frequently accessed state files
 
 ### Pending Todos
 
