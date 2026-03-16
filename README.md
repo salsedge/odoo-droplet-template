@@ -84,6 +84,7 @@ Terraform's remote state backend cannot create its own bucket. You must create i
 3. Choose the same region as your droplet (default: `nyc3`)
 4. Name it `odoo-prod-tfstate` (must match `bucket` in `infra/backend.tf`)
 5. Set access to **Private**
+6. Leave **CDN** disabled — this bucket stores Terraform state files, not public content. CDN caching on a state bucket can cause Terraform to read stale state and produce incorrect plans or conflicts.
 
 > The bucket name in `infra/backend.tf` is hardcoded — Terraform backend blocks cannot use variables. If you use a different name, update `backend.tf` to match.
 
