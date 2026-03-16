@@ -38,6 +38,66 @@ Single-droplet architecture in a DO VPC. Docker dual-network isolation: `fronten
 | Domain name | DNS A record pointed to droplet IP (needed before SSL setup) |
 | Local machine | macOS/Linux with SSH client |
 
+## DigitalOcean Credentials
+
+This project requires **two separate credential sets** from DigitalOcean. They are obtained from different pages and serve different purposes. Recommend Storing all Keys and Passwords in BitWarden.
+
+### 1. API Token (for Terraform provider)
+
+The API token authenticates Terraform to create and manage DO resources (droplets, VPCs, firewalls, volumes).
+
+1. Go to **[cloud.digitalocean.com/account/api/tokens](https://cloud.digitalocean.com/account/api/tokens)**
+2. Click **Generate New Token**
+3. Give it a name (e.g., `odoo-prod-terraform`)
+4. Select **Full Access** (read + write — required to create/destroy resources)
+5. Copy the token — it is only shown once
+
+Set it as:
+```bash
+DIGITALOCEAN_TOKEN=dop_v1_xxxxxxxxxxxxxxxxxxxx
+```
+
+### 2. Spaces Access Keys (for Terraform state backend)
+
+Spaces keys authenticate the Terraform S3 backend to store remote state. These are **not** the same as the API token above — they are object storage credentials scoped to DO Spaces.
+
+1. Go to **[cloud.digitalocean.com/spaces/access_keys](https://cloud.digitalocean.com/spaces/access_keys)**
+2. Click **Generate Access Key**
+3. Choose **Full Access**
+4. Give it a name (e.g., `odoo-prod-tfstate`)
+5. Copy both the **Access Key** and **Secret Key** — the secret is only shown once
+
+Set them as:
+```bash
+AWS_ACCESS_KEY_ID=DO00XXXXXXXXXXXXXXXXXXXX        # "Access Key" from DO Spaces page
+AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxx  # "Secret Key" from DO Spaces page
+```
+
+> **Why AWS variable names?** Terraform's S3 backend uses AWS variable names regardless of provider. These are DigitalOcean Spaces credentials — not AWS credentials.
+
+### 3. Create the Spaces bucket (one-time, manual)
+
+Terraform's remote state backend cannot create its own bucket. You must create it manually before running `terraform init`:
+
+1. Go to **[cloud.digitalocean.com/spaces](https://cloud.digitalocean.com/spaces)**
+2. Click **Create Bucket**
+3. Choose the same region as your droplet (default: `nyc3`)
+4. Name it `odoo-prod-tfstate` (must match `bucket` in `infra/backend.tf`)
+5. Set access to **Private**
+
+> The bucket name in `infra/backend.tf` is hardcoded — Terraform backend blocks cannot use variables. If you use a different name, update `backend.tf` to match.
+
+### 4. SSH key in DO account
+
+The Terraform config references an existing SSH key in your DO account by name.
+
+1. Go to **[cloud.digitalocean.com/account/security](https://cloud.digitalocean.com/account/security)**
+2. Under **SSH Keys**, click **Add SSH Key**
+3. Paste your public key (`~/.ssh/id_ed25519.pub` or equivalent)
+4. Give it a name — use this name as `ssh_key_name` in `infra/terraform.tfvars`
+
+---
+
 ## Quick Start
 
 ### 1. Clone and configure
@@ -45,64 +105,111 @@ Single-droplet architecture in a DO VPC. Docker dual-network isolation: `fronten
 ```bash
 git clone <repo-url> && cd odoo-19.x-build
 
-# Terraform variables
-cp infra/terraform.tfvars.example infra/terraform.tfvars
-# Edit terraform.tfvars with your values (SSH key name, allowed IPs, etc.)
+# Infrastructure credentials (Makefile auto-loads this)
+cp .env.example .env
+chmod 600 .env
+# Edit .env — fill in DIGITALOCEAN_TOKEN, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+# from the steps above
 
-# Set credentials as environment variables
-export DIGITALOCEAN_TOKEN="your-api-token"
-export AWS_ACCESS_KEY_ID="your-spaces-access-key"        # DO Spaces key, not AWS
-export AWS_SECRET_ACCESS_KEY="your-spaces-secret-key"     # DO Spaces secret, not AWS
+# Terraform variables (non-secret config)
+cp infra/terraform.tfvars.example infra/terraform.tfvars
+# Edit terraform.tfvars — set ssh_key_name to your DO SSH key, allowed_ssh_ips to your IP
+
+# Application secrets (deployed to droplet later)
+cp config/.env.example config/.env
+chmod 600 config/.env
+# Edit config/.env — set strong passwords for POSTGRES_PASSWORD and ODOO_ADMIN_PASSWORD
 ```
 
 ### 2. Provision infrastructure
 
 ```bash
-cd infra/
-terraform init
-terraform plan      # Review what will be created
-terraform apply     # Provision VPC, firewall, droplet, volume
+make tf-init        # Initialize Terraform backend (requires DO Spaces bucket)
+make tf-plan        # Preview what will be created
+make tf-apply       # Provision VPC, firewall, droplet, volume
 ```
 
 ### 3. Deploy to droplet
 
+**First run** — upload and harden as root (SSH on port 22):
+
 ```bash
-# Copy files to droplet
-DROPLET_IP=$(terraform output -raw droplet_ip)
-scp -r ../config/ ../scripts/ root@${DROPLET_IP}:/tmp/odoo-setup/
+# Upload config/ and scripts/ to droplet
+make upload SSH_USER=root SSH_PORT=22
 
-# SSH in and run scripts sequentially
-ssh root@${DROPLET_IP}
+# Run host hardening (SSH moves to port 9292, creates deploy user)
+make run-harden SSH_USER=root SSH_PORT=22
+```
 
-# 1. Harden host (SSH moves to port 9292 after this)
-bash /tmp/odoo-setup/scripts/01-harden-host.sh
+**After hardening** — reconnect as deploy user on port 9292:
 
-# Reconnect on new port with deploy user
-exit
-ssh -p 9292 deploy@${DROPLET_IP}
+```bash
+# Install Docker CE
+make run-docker
 
-# 2. Install Docker
-sudo bash /tmp/odoo-setup/scripts/02-install-docker.sh
+# Deploy Odoo + PostgreSQL stack
+make run-stack
 
-# 3. Deploy Odoo + PostgreSQL stack
-cp /tmp/odoo-setup/config/.env.example /tmp/odoo-setup/config/.env
-# Edit .env with strong passwords
-sudo bash /tmp/odoo-setup/scripts/03-deploy-stack.sh
+# Setup Nginx + SSL (requires DNS A record pointing to droplet IP)
+make run-nginx DOMAIN=odoo.example.com CERT_EMAIL=admin@example.com
+```
 
-# 4. Setup Nginx + SSL (requires DNS A record already pointing to droplet)
-sudo bash /tmp/odoo-setup/scripts/04-setup-nginx.sh odoo.example.com admin@example.com
+Or run the full post-hardening sequence in one shot:
+
+```bash
+make deploy-app DOMAIN=odoo.example.com CERT_EMAIL=admin@example.com
 ```
 
 ### 4. Verify
 
 ```bash
-curl -I https://odoo.example.com           # Should return 200/302 + HSTS header
+curl -I https://odoo.example.com              # Should return 200/302 + HSTS header
 curl -I https://odoo.example.com/web/database  # Should return 403
+make status                                    # Check Docker, Nginx, UFW on droplet
 ```
+
+### 5. Teardown and rebuild
+
+```bash
+make tf-destroy     # Destroy all DO infrastructure (interactive confirmation)
+make tf-apply       # Re-provision from scratch
+# Then repeat step 3
+```
+
+### Makefile reference
+
+```bash
+make help           # Show all available targets
+```
+
+| Target | Description |
+|--------|-------------|
+| `tf-init` | Initialize Terraform backend and providers |
+| `tf-plan` | Preview infrastructure changes |
+| `tf-apply` | Provision/update DigitalOcean infrastructure |
+| `tf-destroy` | Destroy all infrastructure (interactive confirmation) |
+| `upload` | Upload config/ and scripts/ to droplet |
+| `run-harden` | Run host hardening script |
+| `run-docker` | Run Docker CE installation script |
+| `run-stack` | Run Odoo + PostgreSQL deployment script |
+| `run-nginx` | Run Nginx + SSL setup (requires `DOMAIN`, `CERT_EMAIL`) |
+| `deploy-phase2` | Full Phase 2: upload + all 4 scripts in order |
+| `deploy-host` | Upload + hardening + Docker install |
+| `deploy-app` | Upload + stack deploy + Nginx/SSL |
+| `status` | Check remote service status (Docker, Nginx, UFW) |
+| `ssh` | Open SSH session to droplet |
+| `logs-odoo` | Tail Odoo container logs |
+| `logs-postgres` | Tail PostgreSQL container logs |
+| `logs-nginx` | Tail Nginx access/error logs |
+| `check` | Run local validation (terraform validate + shellcheck) |
 
 ## Project Structure
 
 ```
+Makefile                Wraps Terraform, SCP, and remote script execution
+.env.example            Template for infrastructure credentials
+.env                    Local credentials — DO token + Spaces keys (gitignored)
+
 infra/                  Terraform — DigitalOcean infrastructure
   ├── providers.tf          Provider config + version constraints
   ├── backend.tf            Remote state on DO Spaces
@@ -121,6 +228,7 @@ config/                 Configuration files for target host
   ├── jail.local            fail2ban SSH + Odoo login jails
   ├── audit.rules           auditd PCI-DSS 10.x rules
   ├── .env.example          Secrets template (PostgreSQL + Odoo passwords)
+  ├── .env                  App secrets — PG + Odoo passwords (gitignored)
   └── nginx/
       ├── odoo-pre-ssl.conf   Temp config for certbot HTTP-01 challenge
       └── odoo.conf            Full SSL reverse proxy with security headers
