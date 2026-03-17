@@ -20,46 +20,46 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### System Hardening
 
-- [ ] **HARD-01**: SSH hardened (key-only auth, no root login, non-standard port, idle timeout)
-- [ ] **HARD-02**: UFW configured with default-deny and explicit allow rules for SSH, HTTP, HTTPS
-- [ ] **HARD-03**: fail2ban installed with jails for SSH and Odoo login failures
-- [ ] **HARD-04**: Kernel parameters hardened (sysctl: disable IP forwarding, enable SYN cookies, disable ICMP redirects)
-- [ ] **HARD-05**: Automatic unattended security updates enabled
-- [ ] **HARD-06**: File permissions restricted on sensitive configs (/etc/ssh, Docker configs, .env files)
-- [ ] **HARD-07**: auditd installed and configured for PCI-DSS 10.x compliance logging
+- [x] **HARD-01**: SSH hardened (key-only auth, no root login, non-standard port, idle timeout)
+- [x] **HARD-02**: UFW configured with default-deny and explicit allow rules for SSH, HTTP, HTTPS
+- [x] **HARD-03**: fail2ban installed with jails for SSH and Odoo login failures
+- [x] **HARD-04**: Kernel parameters hardened (sysctl: disable IP forwarding, enable SYN cookies, disable ICMP redirects)
+- [x] **HARD-05**: Automatic unattended security updates enabled
+- [x] **HARD-06**: File permissions restricted on sensitive configs (/etc/ssh, Docker configs, .env files)
+- [x] **HARD-07**: auditd installed and configured for PCI-DSS 10.x compliance logging
 
 ### Docker and Containers
 
-- [ ] **DOCK-01**: Docker CE installed from official apt repository (not Ubuntu docker.io package)
-- [ ] **DOCK-02**: Docker daemon configured with `iptables: false` to prevent UFW bypass
-- [ ] **DOCK-03**: Docker Compose v2 deploys Odoo and PostgreSQL as separate services
-- [ ] **DOCK-04**: Containers run as non-root users with resource limits (CPU, memory)
-- [ ] **DOCK-05**: Docker networks isolate frontend (Nginx-Odoo) and backend (Odoo-PostgreSQL)
-- [ ] **DOCK-06**: Container health checks configured for both Odoo and PostgreSQL
-- [ ] **DOCK-07**: Docker log rotation configured to prevent disk exhaustion
+- [x] **DOCK-01**: Docker CE installed from official apt repository (not Ubuntu docker.io package)
+- [x] **DOCK-02**: Docker daemon configured with `iptables: false` to prevent UFW bypass
+- [x] **DOCK-03**: Docker Compose v2 deploys Odoo and PostgreSQL as separate services
+- [x] **DOCK-04**: Containers run as non-root users with resource limits (CPU, memory)
+- [x] **DOCK-05**: Docker networks isolate frontend (Nginx-Odoo) and backend (Odoo-PostgreSQL)
+- [x] **DOCK-06**: Container health checks configured for both Odoo and PostgreSQL
+- [x] **DOCK-07**: Docker log rotation configured to prevent disk exhaustion
 
 ### Odoo Application
 
-- [ ] **ODOO-01**: Odoo Community edition deployed with CRM and Project modules enabled
-- [ ] **ODOO-02**: Odoo worker count and memory limits tuned for 10-user workload
-- [ ] **ODOO-03**: Odoo database manager disabled (`list_db = False`)
-- [ ] **ODOO-04**: Odoo filestore persisted on DO Block Storage Volume
-- [ ] **ODOO-05**: Odoo admin password set and `db_manager` routes blocked in Nginx
+- [x] **ODOO-01**: Odoo Community edition deployed with CRM and Project modules enabled
+- [x] **ODOO-02**: Odoo worker count and memory limits tuned for 10-user workload
+- [x] **ODOO-03**: Odoo database manager disabled (`list_db = False`)
+- [x] **ODOO-04**: Odoo filestore persisted on DO Block Storage Volume
+- [x] **ODOO-05**: Odoo admin password set and `db_manager` routes blocked in Nginx
 
 ### PostgreSQL Database
 
-- [ ] **PG-01**: PostgreSQL 16 container with data directory on DO Block Storage Volume
-- [ ] **PG-02**: PostgreSQL tuned for 10-user workload (shared_buffers, work_mem, max_connections)
-- [ ] **PG-03**: PostgreSQL accessible only from Odoo container via Docker backend network
-- [ ] **PG-04**: PostgreSQL credentials stored in .env file with restricted file permissions
+- [x] **PG-01**: PostgreSQL 18 container with data directory on DO Block Storage Volume
+- [x] **PG-02**: PostgreSQL tuned for 10-user workload (shared_buffers, work_mem, max_connections)
+- [x] **PG-03**: PostgreSQL accessible only from Odoo container via Docker backend network
+- [x] **PG-04**: PostgreSQL credentials stored in .env file with restricted file permissions
 
 ### Reverse Proxy and SSL
 
-- [ ] **PROXY-01**: Nginx installed on host as reverse proxy to Odoo container
-- [ ] **PROXY-02**: Let's Encrypt SSL certificate via certbot with DNS-01 challenge (certbot-dns-digitalocean)
-- [ ] **PROXY-03**: Nginx enforces HTTPS redirect and HSTS headers
-- [ ] **PROXY-04**: Nginx blocks access to /web/database/* routes
-- [ ] **PROXY-05**: Certbot auto-renewal configured via systemd timer
+- [x] **PROXY-01**: Nginx installed on host as reverse proxy to Odoo container
+- [x] **PROXY-02**: Let's Encrypt SSL certificate via certbot with HTTP-01 challenge (--webroot)
+- [x] **PROXY-03**: Nginx enforces HTTPS redirect and HSTS headers
+- [x] **PROXY-04**: Nginx blocks access to /web/database/* routes
+- [x] **PROXY-05**: Certbot auto-renewal configured via systemd timer
 
 ### Monitoring
 
@@ -138,34 +138,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IAC-06 | Phase 1 | Complete |
 | IAC-07 | Phase 1 | Complete |
 | IAC-08 | Phase 1 | Complete |
-| HARD-01 | Phase 2 | Pending |
-| HARD-02 | Phase 2 | Pending |
-| HARD-03 | Phase 2 | Pending |
-| HARD-04 | Phase 2 | Pending |
-| HARD-05 | Phase 2 | Pending |
-| HARD-06 | Phase 2 | Pending |
-| HARD-07 | Phase 2 | Pending |
-| DOCK-01 | Phase 2 | Pending |
-| DOCK-02 | Phase 2 | Pending |
-| DOCK-03 | Phase 2 | Pending |
-| DOCK-04 | Phase 2 | Pending |
-| DOCK-05 | Phase 2 | Pending |
-| DOCK-06 | Phase 2 | Pending |
-| DOCK-07 | Phase 2 | Pending |
-| ODOO-01 | Phase 2 | Pending |
-| ODOO-02 | Phase 2 | Pending |
-| ODOO-03 | Phase 2 | Pending |
-| ODOO-04 | Phase 2 | Pending |
-| ODOO-05 | Phase 2 | Pending |
-| PG-01 | Phase 2 | Pending |
-| PG-02 | Phase 2 | Pending |
-| PG-03 | Phase 2 | Pending |
-| PG-04 | Phase 2 | Pending |
-| PROXY-01 | Phase 2 | Pending |
-| PROXY-02 | Phase 2 | Pending |
-| PROXY-03 | Phase 2 | Pending |
-| PROXY-04 | Phase 2 | Pending |
-| PROXY-05 | Phase 2 | Pending |
+| HARD-01 | Phase 2 | Complete |
+| HARD-02 | Phase 2 | Complete |
+| HARD-03 | Phase 2 | Complete |
+| HARD-04 | Phase 2 | Complete |
+| HARD-05 | Phase 2 | Complete |
+| HARD-06 | Phase 2 | Complete |
+| HARD-07 | Phase 2 | Complete |
+| DOCK-01 | Phase 2 | Complete |
+| DOCK-02 | Phase 2 | Complete |
+| DOCK-03 | Phase 2 | Complete |
+| DOCK-04 | Phase 2 | Complete |
+| DOCK-05 | Phase 2 | Complete |
+| DOCK-06 | Phase 2 | Complete |
+| DOCK-07 | Phase 2 | Complete |
+| ODOO-01 | Phase 2 | Complete |
+| ODOO-02 | Phase 2 | Complete |
+| ODOO-03 | Phase 2 | Complete |
+| ODOO-04 | Phase 2 | Complete |
+| ODOO-05 | Phase 2 | Complete |
+| PG-01 | Phase 2 | Complete |
+| PG-02 | Phase 2 | Complete |
+| PG-03 | Phase 2 | Complete |
+| PG-04 | Phase 2 | Complete |
+| PROXY-01 | Phase 2 | Complete |
+| PROXY-02 | Phase 2 | Complete |
+| PROXY-03 | Phase 2 | Complete |
+| PROXY-04 | Phase 2 | Complete |
+| PROXY-05 | Phase 2 | Complete |
 | MON-01 | Phase 3 | Pending |
 | MON-02 | Phase 3 | Pending |
 | MON-03 | Phase 3 | Pending |

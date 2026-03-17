@@ -12,10 +12,10 @@
 
 services:
   # ---------------------------------------------------------------------------
-  # PostgreSQL 16 — Database server
+  # PostgreSQL 18 — Database server
   # ---------------------------------------------------------------------------
   db:
-    image: postgres:16
+    image: postgres:18
     container_name: odoo-db
     restart: unless-stopped
 

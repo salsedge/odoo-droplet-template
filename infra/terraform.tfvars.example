@@ -18,9 +18,8 @@
 #
 # =============================================================================
 
-# DigitalOcean API Token
-# Prefer the DIGITALOCEAN_TOKEN env var above. Uncomment only as a fallback.
-# do_token = "dop_v1_your-api-token-here"
+# DigitalOcean API Token is read from DIGITALOCEAN_TOKEN env var (set in .env)
+# No variable needed in this file.
 
 # Project naming -- used as prefix for all resources
 project_name = "odoo-prod"

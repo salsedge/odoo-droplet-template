@@ -69,6 +69,7 @@ Run `terraform apply` and get a fully hardened, monitored Odoo deployment with N
 | Prod-only for v1 | 10 users, get it working first, add staging later | — Pending |
 | Nginx reverse proxy + Let's Encrypt | Public HTTPS for user access, SSH for admin | — Pending |
 | Local + Spaces backups | Fast local restore + offsite DR covers both scenarios | — Pending |
+| Two Spaces buckets: Standard for tfstate, Cold for backups | Terraform state is tiny but read/written constantly (bad fit for Cold Storage 30-day retention + retrieval fees). Backups are write-once/rarely-read — Cold Storage is 3x cheaper ($0.007 vs $0.02/GiB/mo) | `odoo-prod-tfstate` (Standard), `odoo-prod-backups` (Cold, Phase 4) |
 | Skip CI/CD for v1 | Manual deployment acceptable for initial setup | — Pending |
 | Terraform (not Pulumi) | Primary IaC tool per user preference | — Pending |
 

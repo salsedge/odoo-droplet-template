@@ -9,6 +9,5 @@ terraform {
   }
 }
 
-provider "digitalocean" {
-  token = var.do_token
-}
+# Token read automatically from DIGITALOCEAN_TOKEN env var
+provider "digitalocean" {}
