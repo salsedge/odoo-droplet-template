@@ -63,11 +63,11 @@ Plans:
   3. The documented restore procedure has been executed against a fresh temporary container and the restored database is verified functional
   4. A deployment runbook exists that takes a new operator from fresh git clone to running Odoo in production, and operational procedures cover backup, restore, Odoo updates, and resource scaling
   5. An architecture overview document with network topology diagram describes the complete system
-**Plans**: TBD
+**Plans**: 2 plans (1 wave)
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Backup automation scripts (daily pg_dump + filestore tar, rclone offsite sync, restore + verification, setup script + config templates) (Wave 1)
+- [ ] 03-02-PLAN.md -- Documentation (architecture overview, deployment runbook, operational procedures, enterprise migration guide) (Wave 1)
 
 ### Phase 4: Deployment Verification and User Setup
 **Goal**: An admin and a regular user are set up in Odoo, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
@@ -107,6 +107,6 @@ Note: Phase 5 (Monitoring) is blocked on external Icinga2 master availability.
 |-------|----------------|--------|-----------|
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
-| 3. Backup, Recovery, and Documentation | 0/2 | Not started | - |
+| 3. Backup, Recovery, and Documentation | 0/2 | Planned     | - |
 | 4. Deployment Verification and User Setup | 0/1 | Not started | - |
 | 5. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
