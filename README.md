@@ -269,6 +269,8 @@ artifacts/              Original project specification
 | `POSTGRES_DB` | Database name (default: `odoo`) |
 | `ODOO_ADMIN_PASSWORD` | Odoo master admin password (strong, random) |
 
+> **Password rules:** Values are parsed by both Docker Compose and bash. Do **not** use `$` (triggers variable interpolation), backticks, double quotes, or single quotes in passwords. Characters like `!`, `^`, `*`, `%`, `&`, `#`, `@` are safe. Do **not** wrap values in quotes — Docker Compose `.env` files treat quotes as literal characters.
+
 ## Security Highlights
 
 | Layer | Controls |
