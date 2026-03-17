@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap delivers a production-ready Odoo Community deployment on DigitalOcean in five phases, moving from bare Terraform project to a fully hardened, monitored, and backed-up Odoo instance behind Nginx/SSL -- verified end-to-end with real users. Phase 1 provisions all DigitalOcean infrastructure via Terraform. Phase 2 is the core build -- hardening the host, deploying the Docker application stack, and configuring Nginx with SSL -- turning a bare droplet into a working Odoo instance. Phase 3 adds Icinga2 monitoring for operational visibility. Phase 4 completes backup automation, tested restore procedures, and comprehensive documentation. Phase 5 creates real user accounts and verifies the entire system end-to-end -- confirming that every prior phase works together in production with actual users. WireGuard VPN is deferred to v2; this is a single-droplet architecture.
+This roadmap delivers a production-ready Odoo Community deployment on DigitalOcean in five phases, moving from bare Terraform project to a fully hardened, backed-up, and monitored Odoo instance behind Nginx/SSL -- verified end-to-end with real users. Phase 1 provisions all DigitalOcean infrastructure via Terraform. Phase 2 is the core build -- hardening the host, deploying the Docker application stack, and configuring Nginx with SSL -- turning a bare droplet into a working Odoo instance. Phase 3 completes backup automation, tested restore procedures, and comprehensive documentation. Phase 4 creates real user accounts and verifies the entire system end-to-end -- confirming that every prior phase works together in production with actual users. Phase 5 adds Icinga2 monitoring for operational visibility once the external Icinga2 master is built and ready. WireGuard VPN is deferred to v2; this is a single-droplet architecture.
 
 ## Phases
 
@@ -14,9 +14,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
 - [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
-- [ ] **Phase 3: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources
-- [ ] **Phase 4: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures
-- [ ] **Phase 5: Deployment Verification and User Setup** - Create admin and regular user accounts, verify all system components work end-to-end with real users
+- [ ] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures
+- [ ] **Phase 4: Deployment Verification and User Setup** - Create admin and regular user accounts, verify all system components work end-to-end with real users
+- [ ] **Phase 5: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
 
 ## Phase Details
 
@@ -53,23 +53,9 @@ Plans:
 - [x] 02-02-PLAN.md -- Docker Compose stack: Odoo 19 + PostgreSQL 18, dual networks, health checks, resource limits (Wave 2, depends: 02-01)
 - [x] 02-03-PLAN.md -- Nginx reverse proxy + Let's Encrypt SSL via HTTP-01, security headers, certbot auto-renewal (Wave 2, depends: 02-01)
 
-### Phase 3: Monitoring
-**Goal**: The Odoo host reports health status to the existing Icinga2 master -- container failures, PostgreSQL issues, and system resource exhaustion trigger alerts without manual log inspection
-**Depends on**: Phase 2
-**Requirements**: MON-01, MON-02, MON-03, MON-04, MON-05
-**Success Criteria** (what must be TRUE):
-  1. The Icinga2 agent on the Odoo host is registered with the existing Icinga2 master and appears as a monitored host in the Icinga2 dashboard
-  2. Stopping the Odoo or PostgreSQL container triggers a critical alert on the Icinga2 master within the check interval
-  3. System resource checks (CPU, memory, disk, load average) and PostgreSQL-specific checks (connections, database size, query latency) report OK under normal operation and escalate when thresholds are breached
-  4. Service definition files are provided and documented so the Icinga2 master admin can integrate them
-**Plans**: TBD
-
-Plans:
-- [ ] 03-01: TBD
-
-### Phase 4: Backup, Recovery, and Documentation
+### Phase 3: Backup, Recovery, and Documentation
 **Goal**: PostgreSQL data is automatically backed up daily with offsite copies, restore has been tested and verified, and the entire deployment is documented for reproducibility and ongoing operations
-**Depends on**: Phase 3
+**Depends on**: Phase 2
 **Requirements**: BACK-01, BACK-02, BACK-03, BACK-04, DOC-01, DOC-02, DOC-03, DOC-04
 **Success Criteria** (what must be TRUE):
   1. A daily automated pg_dump writes to the local Block Storage Volume, and rclone syncs backups to DO Spaces -- both local and remote backups are present and current
@@ -80,19 +66,32 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 03-01: TBD
+- [ ] 03-02: TBD
 
-### Phase 5: Deployment Verification and User Setup
-**Goal**: An admin and a regular user are set up in Odoo, and the entire production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, monitoring alerts, and backups all function correctly with real user accounts
-**Depends on**: Phase 4
-**Requirements**: Cross-cutting verification of all prior phases (IAC, HARD, DOCK, ODOO, PG, PROXY, MON, BACK, DOC)
+### Phase 4: Deployment Verification and User Setup
+**Goal**: An admin and a regular user are set up in Odoo, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
+**Depends on**: Phase 3
+**Requirements**: Cross-cutting verification of Phases 1-3 (IAC, HARD, DOCK, ODOO, PG, PROXY, BACK, DOC)
 **Success Criteria** (what must be TRUE):
   1. An admin user can log in to Odoo, access Settings, install/configure CRM and Project modules, and manage user accounts
   2. A regular user with restricted permissions can log in, create a CRM lead, advance it through pipeline stages, and create and manage a Project with tasks -- without access to admin settings
   3. Both users access Odoo exclusively over HTTPS with a valid SSL certificate, HTTP requests redirect to HTTPS, and the browser shows no certificate warnings
-  4. Stopping a container (Odoo or PostgreSQL) triggers a monitoring alert on the Icinga2 master, and restarting the container clears the alert -- verified live
-  5. A backup runs successfully, the backup file appears in both local storage and DO Spaces, and the backup restoration procedure is confirmed functional with the live database
+  4. A backup runs successfully, the backup file appears in both local storage and DO Spaces, and the backup restoration procedure is confirmed functional with the live database
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+
+### Phase 5: Monitoring
+**Goal**: The Odoo host reports health status to the existing Icinga2 master -- container failures, PostgreSQL issues, and system resource exhaustion trigger alerts without manual log inspection
+**Depends on**: Phase 2 + external Icinga2 master must be built and operational
+**Requirements**: MON-01, MON-02, MON-03, MON-04, MON-05
+**Success Criteria** (what must be TRUE):
+  1. The Icinga2 agent on the Odoo host is registered with the existing Icinga2 master and appears as a monitored host in the Icinga2 dashboard
+  2. Stopping the Odoo or PostgreSQL container triggers a critical alert on the Icinga2 master within the check interval
+  3. System resource checks (CPU, memory, disk, load average) and PostgreSQL-specific checks (connections, database size, query latency) report OK under normal operation and escalate when thresholds are breached
+  4. Service definition files are provided and documented so the Icinga2 master admin can integrate them
 **Plans**: TBD
 
 Plans:
@@ -102,11 +101,12 @@ Plans:
 
 **Execution Order:**
 Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Note: Phase 5 (Monitoring) is blocked on external Icinga2 master availability.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
-| 3. Monitoring | 0/1 | Not started | - |
-| 4. Backup, Recovery, and Documentation | 0/2 | Not started | - |
-| 5. Deployment Verification and User Setup | 0/1 | Not started | - |
+| 3. Backup, Recovery, and Documentation | 0/2 | Not started | - |
+| 4. Deployment Verification and User Setup | 0/1 | Not started | - |
+| 5. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |

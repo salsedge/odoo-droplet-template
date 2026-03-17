@@ -166,21 +166,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROXY-03 | Phase 2 | Complete |
 | PROXY-04 | Phase 2 | Complete |
 | PROXY-05 | Phase 2 | Complete |
-| MON-01 | Phase 3 | Pending |
-| MON-02 | Phase 3 | Pending |
-| MON-03 | Phase 3 | Pending |
-| MON-04 | Phase 3 | Pending |
-| MON-05 | Phase 3 | Pending |
-| BACK-01 | Phase 4 | Pending |
-| BACK-02 | Phase 4 | Pending |
-| BACK-03 | Phase 4 | Pending |
-| BACK-04 | Phase 4 | Pending |
-| DOC-01 | Phase 4 | Pending |
-| DOC-02 | Phase 4 | Pending |
-| DOC-03 | Phase 4 | Pending |
-| DOC-04 | Phase 4 | Pending |
+| BACK-01 | Phase 3 | Pending |
+| BACK-02 | Phase 3 | Pending |
+| BACK-03 | Phase 3 | Pending |
+| BACK-04 | Phase 3 | Pending |
+| DOC-01 | Phase 3 | Pending |
+| DOC-02 | Phase 3 | Pending |
+| DOC-03 | Phase 3 | Pending |
+| DOC-04 | Phase 3 | Pending |
+| MON-01 | Phase 5 | Pending |
+| MON-02 | Phase 5 | Pending |
+| MON-03 | Phase 5 | Pending |
+| MON-04 | Phase 5 | Pending |
+| MON-05 | Phase 5 | Pending |
 
-**Phase 5 note:** Phase 5 (Deployment Verification and User Setup) introduces no new requirements. It is a cross-cutting integration verification phase that validates all 48 existing requirements work together end-to-end with real user accounts.
+**Phase 4 note:** Phase 4 (Deployment Verification and User Setup) introduces no new requirements. It is a cross-cutting integration verification phase that validates Phases 1-3 requirements work together end-to-end with real user accounts. MON requirements are verified separately in Phase 5 when the Icinga2 master is available.
 
 **Coverage:**
 - v1 requirements: 48 total
@@ -189,4 +189,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after roadmap revision (Phase 5 added)*
+*Last updated: 2026-03-17 after phase reorder (Monitoring moved from Phase 3 to Phase 5, blocked on external Icinga2 master)*

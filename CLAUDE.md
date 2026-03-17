@@ -11,7 +11,7 @@ Production-ready IaC deployment of Odoo Community 19.x on DigitalOcean. Terrafor
 - **Containers:** Docker CE (official repo) + Docker Compose v2
 - **Application:** Odoo Community 19, PostgreSQL 18
 - **Reverse Proxy:** Nginx (host-installed, not containerized) + Let's Encrypt (certbot)
-- **Monitoring:** Icinga2 agent → existing master (Phase 3)
+- **Monitoring:** Icinga2 agent → existing master (Phase 5, blocked on Icinga2 master build)
 - **State Backend:** DigitalOcean Spaces (S3-compatible)
 
 ## Directory Structure
@@ -168,6 +168,8 @@ When modifying plans or requirements, update the relevant `.planning/` file and 
 ## Current Status
 
 - **Phase 1** — Complete (Terraform infrastructure provisioned)
-- **Phase 2** — In progress (scripts and configs written, pending execution on droplet)
-- **Phases 3–5** — Not started
-- **Overall:** ~30% complete
+- **Phase 2** — Complete (scripts and configs written, pending execution on droplet)
+- **Phase 3** — Not started (Backup, Recovery, and Documentation)
+- **Phase 4** — Not started (Deployment Verification and User Setup)
+- **Phase 5** — Not started (Monitoring — blocked on external Icinga2 master)
+- **Overall:** ~40% complete

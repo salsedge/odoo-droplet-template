@@ -190,7 +190,25 @@ Odoo runs 3 workers + 1 cron thread, tuned for 10 concurrent users on 2 vCPU / 4
 | PROXY-04 | Block /web/database/* routes | Returns 403 |
 | PROXY-05 | Certbot auto-renewal | systemd timer, twice daily with random delay |
 
-### 6.7 Monitoring (Phase 3)
+### 6.7 Backup and Recovery (Phase 3)
+
+| ID | Requirement | Acceptance Criteria |
+|----|-------------|---------------------|
+| BACK-01 | Daily pg_dump to local Block Storage | Automated via cron/systemd timer |
+| BACK-02 | Backup sync to DO Spaces via rclone | Offsite copy after each local dump |
+| BACK-03 | Retention policy enforced | 7 daily + 4 weekly local, 30 days on Spaces |
+| BACK-04 | Tested restore procedure | Documented, executed, verified against fresh container |
+
+### 6.8 Documentation (Phase 3)
+
+| ID | Requirement | Acceptance Criteria |
+|----|-------------|---------------------|
+| DOC-01 | Architecture overview with topology diagram | Network, containers, volumes, firewalls documented |
+| DOC-02 | Deployment runbook | Fresh clone → running Odoo, step-by-step |
+| DOC-03 | Operational procedures | Backup, restore, Odoo updates, resource scaling |
+| DOC-04 | Enterprise migration path | Short getting-started doc for edition upgrade |
+
+### 6.9 Monitoring (Phase 5)
 
 | ID | Requirement | Acceptance Criteria |
 |----|-------------|---------------------|
@@ -200,31 +218,13 @@ Odoo runs 3 workers + 1 cron thread, tuned for 10 concurrent users on 2 vCPU / 4
 | MON-04 | System resource checks | CPU, memory, disk, load average |
 | MON-05 | Service definitions for master integration | Config files provided and documented |
 
-### 6.8 Backup and Recovery (Phase 4)
-
-| ID | Requirement | Acceptance Criteria |
-|----|-------------|---------------------|
-| BACK-01 | Daily pg_dump to local Block Storage | Automated via cron/systemd timer |
-| BACK-02 | Backup sync to DO Spaces via rclone | Offsite copy after each local dump |
-| BACK-03 | Retention policy enforced | 7 daily + 4 weekly local, 30 days on Spaces |
-| BACK-04 | Tested restore procedure | Documented, executed, verified against fresh container |
-
-### 6.9 Documentation (Phase 4)
-
-| ID | Requirement | Acceptance Criteria |
-|----|-------------|---------------------|
-| DOC-01 | Architecture overview with topology diagram | Network, containers, volumes, firewalls documented |
-| DOC-02 | Deployment runbook | Fresh clone → running Odoo, step-by-step |
-| DOC-03 | Operational procedures | Backup, restore, Odoo updates, resource scaling |
-| DOC-04 | Enterprise migration path | Short getting-started doc for edition upgrade |
-
 ## 7. Phased Delivery
 
 ### Phase 1: Terraform Foundation and Compute — COMPLETE
 **Delivered:** VPC, cloud firewall, Ubuntu 24.04 droplet, Block Storage Volume, Spaces state backend
 **Completed:** 2026-02-21
 
-### Phase 2: Hardened Application Stack — IN PROGRESS
+### Phase 2: Hardened Application Stack — COMPLETE
 **Delivers:** PCI-DSS host hardening, Docker + Compose stack, Nginx/SSL reverse proxy
 **Requirements:** HARD-01–07, DOCK-01–07, ODOO-01–05, PG-01–04, PROXY-01–05 (28 requirements)
 **Success Criteria:**
@@ -234,17 +234,18 @@ Odoo runs 3 workers + 1 cron thread, tuned for 10 concurrent users on 2 vCPU / 4
 4. PostgreSQL reachable only from Odoo container — no published ports, no outbound internet
 5. All persistent data on Block Storage Volume
 
-### Phase 3: Monitoring
-**Delivers:** Icinga2 agent, custom checks for containers/PostgreSQL/system resources
-**Requirements:** MON-01–05
-
-### Phase 4: Backup, Recovery, and Documentation
+### Phase 3: Backup, Recovery, and Documentation
 **Delivers:** Automated backups, tested restore, complete documentation
 **Requirements:** BACK-01–04, DOC-01–04
 
-### Phase 5: Deployment Verification and User Setup
-**Delivers:** Real user accounts, end-to-end verification of all prior phases
-**Covers:** Cross-cutting validation of all 48 requirements
+### Phase 4: Deployment Verification and User Setup
+**Delivers:** Real user accounts, end-to-end verification of Phases 1-3
+**Covers:** Cross-cutting validation of IAC, HARD, DOCK, ODOO, PG, PROXY, BACK, DOC requirements
+
+### Phase 5: Monitoring
+**Delivers:** Icinga2 agent, custom checks for containers/PostgreSQL/system resources
+**Requirements:** MON-01–05
+**Note:** Blocked on external Icinga2 master being built and operational
 
 ## 8. Security and Compliance
 
@@ -285,7 +286,7 @@ Odoo runs 3 workers + 1 cron thread, tuned for 10 concurrent users on 2 vCPU / 4
 - DigitalOcean account with API token and Spaces access keys available
 - SSH key pair exists or will be created
 - DNS A record will be pointed to droplet IP before SSL setup
-- Icinga2 master server is operational and admin available for agent registration
+- Icinga2 master server is operational and admin available for agent registration (Phase 5 — master being built separately)
 - Odoo 19 Docker image available on Docker Hub (fallback: pin to 18 if needed)
 
 ## 10. Open Questions and v2 Backlog
@@ -293,7 +294,7 @@ Odoo runs 3 workers + 1 cron thread, tuned for 10 concurrent users on 2 vCPU / 4
 ### Open Questions
 
 - Verify Odoo 19 Docker Hub image availability before Phase 2 execution
-- Confirm Icinga2 agent-to-master registration workflow with master admin (Phase 3 dependency)
+- Confirm Icinga2 agent-to-master registration workflow with master admin (Phase 5 dependency — master being built separately)
 
 ### v2 Backlog
 
