@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 
 ## Current Position
 
-Phase: 2 of 5 (Hardened Application Stack) -- COMPLETE
-Plan: 3 of 3 executed in current phase (02-01, 02-02, 02-03 all complete)
-Status: Phase 2 complete, ready for Phase 3 (Backup, Recovery, and Documentation)
-Last activity: 2026-03-12 -- Executed 02-01 (Host Hardening & Docker Installation)
+Phase: 3 of 5 (Backup, Recovery, and Documentation) -- COMPLETE
+Plan: 2 of 2 executed in current phase (03-01, 03-02 all complete)
+Status: Phase 3 complete, ready for Phase 4 (Deployment Verification and User Setup)
+Last activity: 2026-03-17 -- Executed 03-02 (Documentation)
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 2.4 min
-- Total execution time: 0.2 hours
+- Total plans completed: 7
+- Average duration: 2.9 min
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████░░░░] 60%
 |-------|-------|-------|----------|
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 | 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
+| 3 - Backup, Recovery, and Documentation | 2 | 11 min | 5.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-02 (3 min), 02-03 (3 min), 02-01 (4 min)
+- Last 5 plans: 02-02 (3 min), 02-03 (3 min), 02-01 (4 min), 03-01 (5 min), 03-02 (6 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -75,6 +76,15 @@ Recent decisions affecting current work:
 - [02-03]: DNS pre-check before certbot prevents wasted rate-limited attempts
 - [02-03]: HTTP-01 challenge (not DNS-01) for simpler setup without DO API token
 - [Infra]: Two Spaces buckets — `odoo-prod-tfstate` (Standard) for TF state, `odoo-prod-backups` (Cold Storage) for Phase 3 backups. Cold Storage is 3x cheaper but has 30-day retention + retrieval fees, unsuitable for frequently accessed state files
+- [03-01]: Status file uses Nagios convention (0=OK, 2=CRITICAL) for Phase 5 Icinga2 integration
+- [03-01]: Offsite sync writes separate sync-status.json alongside backup-status.json
+- [03-01]: Restore script defaults to verify-only mode (requires explicit --production for live restore)
+- [03-01]: rclone.conf.example uses SPACES_REGION_PLACEHOLDER for endpoint to support non-nyc3 regions
+- [03-01]: Retention cleanup runs BEFORE new backup to free space first
+- [03-02]: ASCII + Mermaid dual diagrams for terminal and GitHub rendering
+- [03-02]: Deployment runbook structured as 9 numbered steps matching script execution order
+- [03-02]: Operations doc uses numbered self-contained sections for jump-to-procedure access
+- [03-02]: Enterprise migration covers bind-mount approach (more portable than private registry)
 
 ### Pending Todos
 
@@ -88,6 +98,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-12
-Stopped at: Completed 02-01-PLAN.md (Host Hardening & Docker Installation) -- Phase 2 complete
+Last session: 2026-03-17
+Stopped at: Completed 03-02-PLAN.md (Documentation) -- Phase 3 complete
 Resume file: None

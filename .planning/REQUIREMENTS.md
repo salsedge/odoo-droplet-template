@@ -71,10 +71,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Backup and Recovery
 
-- [ ] **BACK-01**: Automated daily pg_dump to local DO Block Storage Volume
-- [ ] **BACK-02**: Automated sync of backups to DO Spaces via rclone
-- [ ] **BACK-03**: Backup retention policy (7 daily, 4 weekly on local; 30 days on Spaces)
-- [ ] **BACK-04**: Documented and tested restore procedure with verification script
+- [x] **BACK-01**: Automated daily pg_dump to local DO Block Storage Volume
+- [x] **BACK-02**: Automated sync of backups to DO Spaces via rclone
+- [x] **BACK-03**: Backup retention policy (7 daily, 4 weekly on local; 30 days on Spaces)
+- [x] **BACK-04**: Documented and tested restore procedure with verification script
 
 ### Documentation
 
@@ -166,10 +166,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROXY-03 | Phase 2 | Complete |
 | PROXY-04 | Phase 2 | Complete |
 | PROXY-05 | Phase 2 | Complete |
-| BACK-01 | Phase 3 | Pending |
-| BACK-02 | Phase 3 | Pending |
-| BACK-03 | Phase 3 | Pending |
-| BACK-04 | Phase 3 | Pending |
+| BACK-01 | Phase 3 | Complete |
+| BACK-02 | Phase 3 | Complete |
+| BACK-03 | Phase 3 | Complete |
+| BACK-04 | Phase 3 | Complete |
 | DOC-01 | Phase 3 | Pending |
 | DOC-02 | Phase 3 | Pending |
 | DOC-03 | Phase 3 | Pending |

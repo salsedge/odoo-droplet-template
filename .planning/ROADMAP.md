@@ -66,7 +66,7 @@ Plans:
 **Plans**: 2 plans (1 wave)
 
 Plans:
-- [ ] 03-01-PLAN.md -- Backup automation scripts (daily pg_dump + filestore tar, rclone offsite sync, restore + verification, setup script + config templates) (Wave 1)
+- [x] 03-01-PLAN.md -- Backup automation scripts (daily pg_dump + filestore tar, rclone offsite sync, restore + verification, setup script + config templates) (Wave 1)
 - [ ] 03-02-PLAN.md -- Documentation (architecture overview, deployment runbook, operational procedures, enterprise migration guide) (Wave 1)
 
 ### Phase 4: Deployment Verification and User Setup
@@ -107,6 +107,6 @@ Note: Phase 5 (Monitoring) is blocked on external Icinga2 master availability.
 |-------|----------------|--------|-----------|
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
-| 3. Backup, Recovery, and Documentation | 0/2 | Planned     | - |
+| 3. Backup, Recovery, and Documentation | 1/2 | In Progress | - |
 | 4. Deployment Verification and User Setup | 0/1 | Not started | - |
 | 5. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
