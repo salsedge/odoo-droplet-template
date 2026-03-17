@@ -78,10 +78,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Documentation
 
-- [ ] **DOC-01**: Architecture overview document with network topology diagram
-- [ ] **DOC-02**: Deployment runbook (step-by-step from fresh clone to running Odoo)
-- [ ] **DOC-03**: Operational procedures (backup, restore, update Odoo, scale resources)
-- [ ] **DOC-04**: Short getting-started document for Enterprise edition migration path
+- [x] **DOC-01**: Architecture overview document with network topology diagram
+- [x] **DOC-02**: Deployment runbook (step-by-step from fresh clone to running Odoo)
+- [x] **DOC-03**: Operational procedures (backup, restore, update Odoo, scale resources)
+- [x] **DOC-04**: Short getting-started document for Enterprise edition migration path
 
 ## v2 Requirements
 
@@ -170,10 +170,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BACK-02 | Phase 3 | Complete |
 | BACK-03 | Phase 3 | Complete |
 | BACK-04 | Phase 3 | Complete |
-| DOC-01 | Phase 3 | Pending |
-| DOC-02 | Phase 3 | Pending |
-| DOC-03 | Phase 3 | Pending |
-| DOC-04 | Phase 3 | Pending |
+| DOC-01 | Phase 3 | Complete |
+| DOC-02 | Phase 3 | Complete |
+| DOC-03 | Phase 3 | Complete |
+| DOC-04 | Phase 3 | Complete |
 | MON-01 | Phase 5 | Pending |
 | MON-02 | Phase 5 | Pending |
 | MON-03 | Phase 5 | Pending |
