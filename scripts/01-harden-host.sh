@@ -89,10 +89,14 @@ mkdir -p /run/sshd
 sshd -t -f /etc/ssh/sshd_config
 echo "SSH config validated"
 
-# Restart SSH (connection on port 22 stays alive; new connections use 9292)
-# Ubuntu 24.04 uses ssh.service, not sshd.service
-systemctl restart ssh
-echo "SSH restarted on port 9292"
+# Ubuntu 24.04 uses systemd socket activation (ssh.socket) which controls
+# the listening port independently of sshd_config. Disable socket activation
+# and run sshd as a traditional service so sshd_config Port directive works.
+systemctl disable --now ssh.socket 2>/dev/null || true
+systemctl enable ssh.service
+
+systemctl restart ssh.service
+echo "SSH restarted on port 9292 (socket activation disabled)"
 
 # =============================================================================
 # HARD-02: UFW Firewall
