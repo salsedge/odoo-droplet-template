@@ -1,0 +1,13 @@
+# =============================================================================
+# Cron Entries — Odoo Backup & Offsite Sync
+# =============================================================================
+# Requirements: BACK-01 (daily backup), BACK-02 (offsite sync)
+#
+# Deployed to: /etc/cron.d/odoo-backup by 05-setup-backups.sh
+# =============================================================================
+
+# BACK-01: Daily backup at 2:30 AM (pg_dump + filestore tar + retention)
+30 2 * * * root /opt/odoo/scripts/06-backup-daily.sh >> /var/log/odoo-backup.log 2>&1
+
+# BACK-02: Offsite sync at 3:30 AM (1 hour after backup completes)
+30 3 * * * root /opt/odoo/scripts/07-sync-offsite.sh >> /var/log/odoo-backup-sync.log 2>&1
