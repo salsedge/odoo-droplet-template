@@ -170,6 +170,7 @@ When modifying plans or requirements, update the relevant `.planning/` file and 
 - **Phase 1** — Complete (Terraform infrastructure provisioned)
 - **Phase 2** — Complete (scripts and configs written, pending execution on droplet)
 - **Phase 3** — Complete (Backup scripts, restore verification, documentation)
-- **Phase 4** — Not started (Deployment Verification and User Setup)
-- **Phase 5** — Not started (Monitoring — blocked on external Icinga2 master)
-- **Overall:** ~80% complete
+- **Phase 4** — Not started (Playwright E2E Testing and Odoo Verification)
+- **Phase 5** — Not started (Deployment Verification and User Setup)
+- **Phase 6** — Not started (Monitoring — blocked on external Icinga2 master)
+- **Overall:** ~50% complete (3/6 phases)

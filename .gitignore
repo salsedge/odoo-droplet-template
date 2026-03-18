@@ -44,3 +44,6 @@ terraform.rc
 # Environment files with secrets
 .env
 config/.env
+
+# MkDocs build output
+site/

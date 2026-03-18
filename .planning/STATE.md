@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 
 Phase: 3 of 5 (Backup, Recovery, and Documentation) -- COMPLETE
 Plan: 3 of 3 executed in current phase (03-01, 03-02, 03-03 all complete)
-Status: Phase 3 complete (including gap closure), ready for Phase 4 (Deployment Verification and User Setup)
+Status: Phase 3 complete (including gap closure), ready for Phase 4 (Playwright E2E Testing and Odoo Verification)
 Last activity: 2026-03-18 -- Executed 03-03 (Spaces Lifecycle Rule Documentation)
 
 Progress: [████████░░] 80%
@@ -38,6 +38,11 @@ Progress: [████████░░] 80%
 *Updated after each plan completion*
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 6 added: Playwright E2E Testing and Odoo Verification
+- Reordered phases: Playwright (was 6) → Phase 4, Deployment Verification (was 4) → Phase 5, Monitoring (was 5) → Phase 6. Playwright tests needed before deployment verification so E2E suite can drive user setup and system validation.
 
 ### Decisions
 
