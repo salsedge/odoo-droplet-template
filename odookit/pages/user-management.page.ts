@@ -35,56 +35,107 @@ export class UserManagementPage {
     name: string,
     login: string,
     password: string,
-    options?: { groups?: string[] }
+    options?: { groups?: Record<string, string> }
   ): Promise<void> {
     await this.openUsers();
 
     // Click "New" to create a user
     await this.page.getByRole('button', { name: 'New' }).click();
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(1000);
 
-    // Fill the user name
-    await this.page.locator('input[name="name"]').fill(name);
+    // Wait for the form to load
+    await this.page.locator('.o_form_view').waitFor({ state: 'visible', timeout: 10000 });
+
+    // Odoo 19 user form: name is a textbox with placeholder "e.g. John Doe"
+    // Login is a textbox labeled "Login" (version-sensitive)
+    const nameField = this.page.getByRole('textbox', { name: /john doe/i });
+    const nameFieldFallback = this.page.locator('.o_field_widget[name="name"] input, input[name="name"]').first();
+    const nameTarget = await nameField.isVisible({ timeout: 2000 }).catch(() => false) ? nameField : nameFieldFallback;
+    await nameTarget.fill(name);
     await this.page.waitForTimeout(300);
 
     // Fill the login/email
-    await this.page.locator('input[name="login"]').fill(login);
+    const loginField = this.page.getByRole('textbox', { name: 'Login' });
+    const loginFieldFallback = this.page.locator('.o_field_widget[name="login"] input, input[name="login"]').first();
+    const loginTarget = await loginField.isVisible({ timeout: 2000 }).catch(() => false) ? loginField : loginFieldFallback;
+    await loginTarget.fill(login);
     await this.page.waitForTimeout(500);
 
     // Handle group assignments if specified
+    // Odoo 19 uses dropdown textbox fields for role groups (e.g., Sales: "No" -> "User: Own Documents Only")
+    // Groups format: { fieldLabel: optionText } e.g., { "Sales": "User: Own Documents Only", "Project": "User" }
     if (options?.groups) {
-      for (const group of options.groups) {
-        // Groups are typically selection fields or checkboxes in the Access Rights tab
-        const groupOption = this.page.getByText(group, { exact: false });
-        if (await groupOption.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await groupOption.click();
+      for (const [fieldLabel, optionText] of Object.entries(options.groups)) {
+        // Find the dropdown for this field (e.g., the "Sales?" textbox)
+        const dropdown = this.page.getByRole('textbox', { name: new RegExp(fieldLabel, 'i') });
+        if (await dropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await dropdown.click();
+          await this.page.waitForTimeout(300);
+
+          // Clear existing value and type the option
+          await dropdown.fill('');
+          await this.page.waitForTimeout(200);
+          await dropdown.fill(optionText);
+          await this.page.waitForTimeout(500);
+
+          // Select from the autocomplete dropdown
+          const autocompleteOption = this.page.locator('.o-autocomplete--dropdown-item, .o_m2o_dropdown_option, .ui-menu-item').filter({ hasText: optionText }).first();
+          if (await autocompleteOption.isVisible({ timeout: 3000 }).catch(() => false)) {
+            await autocompleteOption.click();
+          } else {
+            // Try pressing Enter to select the first match
+            await dropdown.press('Enter');
+          }
           await this.page.waitForTimeout(300);
         }
       }
     }
 
-    // Save the user form
-    // o_form_button_save: Odoo form save button (version-sensitive class)
+    // Save the user form via the save button
+    // Odoo 19 uses "Save manually" button in the control panel
+    const saveManually = this.page.getByRole('button', { name: 'Save manually' });
     const saveButton = this.page.locator('.o_form_button_save');
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
+    const saveTarget = await saveManually.isVisible({ timeout: 2000 }).catch(() => false)
+      ? saveManually
+      : saveButton;
+
+    if (await saveTarget.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await saveTarget.click();
     }
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(2000);
 
     // Set the password via the action menu
-    await this.page.getByRole('button', { name: 'Action' }).click();
+    const actionsMenu = this.page.getByRole('button', { name: 'Actions menu' });
+    const actionButton = this.page.getByRole('button', { name: 'Action' });
+    const actionTarget = await actionsMenu.isVisible({ timeout: 2000 }).catch(() => false)
+      ? actionsMenu
+      : actionButton;
+
+    await actionTarget.click();
     await this.page.waitForTimeout(300);
     await this.page.getByText('Change Password').click();
     await this.page.waitForTimeout(500);
 
     // Fill the new password in the dialog
-    // o_dialog: Odoo dialog container (version-sensitive class)
-    const dialog = this.page.locator('.o_dialog');
-    const passwordInput = dialog.locator('input[name="new_passwd"], input[type="password"]').first();
+    // Target the Change Password dialog specifically (not the notification banner)
+    const dialog = this.page.getByRole('dialog').filter({ hasText: 'Change Password' });
+    await dialog.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Odoo 19 Change Password dialog uses an editable list/table:
+    // Row contains: [User Login cell] [New Password cell (click to edit)]
+    // Click the password cell to activate the input, then fill it
+    const passwordCell = dialog.getByRole('row', { name: new RegExp(login.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).getByRole('cell').nth(1);
+    await passwordCell.click();
+    await this.page.waitForTimeout(300);
+
+    // After clicking, an input should appear in the cell
+    const passwordInput = dialog.locator('input[name="new_passwd"], input.o_field_widget, td.o_data_cell input, input[type="text"]').first();
     await passwordInput.fill(password);
+    await this.page.waitForTimeout(300);
 
     // Confirm the password change
-    await dialog.getByRole('button', { name: 'Change Password' }).click();
+    const changeBtn = dialog.getByRole('button', { name: 'Change Password' });
+    await changeBtn.click();
     await this.page.waitForTimeout(1000);
   }
 
@@ -116,6 +167,7 @@ export class UserManagementPage {
 
   /**
    * Check if a user with the given login exists in the users list.
+   * Uses the data rows in the list view (not search input text) to avoid false positives.
    */
   async userExists(login: string): Promise<boolean> {
     await this.openUsers();
@@ -124,10 +176,12 @@ export class UserManagementPage {
     const searchInput = this.page.locator('.o_searchview_input');
     await searchInput.fill(login);
     await searchInput.press('Enter');
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(2000);
 
-    // Check if any result matches
-    const userRow = this.page.getByText(login, { exact: false });
-    return userRow.isVisible({ timeout: 2000 }).catch(() => false);
+    // Check if any data row in the list contains this login
+    // o_data_row: Odoo list view row (version-sensitive class)
+    // Only check within data rows, not the search input itself
+    const userRow = this.page.locator('.o_data_row', { hasText: login });
+    return userRow.isVisible({ timeout: 3000 }).catch(() => false);
   }
 }

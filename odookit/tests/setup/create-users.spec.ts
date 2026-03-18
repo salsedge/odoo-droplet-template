@@ -38,8 +38,12 @@ test.describe('Test user creation and verification', () => {
     }
 
     // Create user with CRM and Project access groups
+    // Odoo 19 groups: field label -> dropdown option text
     await userMgmt.createUser(testName, testLogin!, testPassword!, {
-      groups: ['Sales / User: Own Documents Only', 'Project / User'],
+      groups: {
+        'Sales': 'User: Own Documents Only',
+        'Project': 'User',
+      },
     });
 
     // Verify user was created

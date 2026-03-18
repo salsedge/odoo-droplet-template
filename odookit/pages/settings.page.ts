@@ -57,7 +57,10 @@ export class SettingsPage {
 
     // Collect module names from the list/kanban
     // o_kanban_record: Odoo kanban record card (version-sensitive class)
-    const moduleCards = this.page.locator('.o_kanban_record .oe_module_name, .o_kanban_record .o_module_name');
+    // Odoo 19 may use different class names for module names in the kanban view
+    const moduleCards = this.page.locator(
+      '.o_kanban_record .oe_module_name, .o_kanban_record .o_module_name, .o_kanban_record .o_kanban_record_title span'
+    );
     const names: string[] = [];
     const count = await moduleCards.count();
 
@@ -71,8 +74,14 @@ export class SettingsPage {
 
   /**
    * Check if a specific module is installed.
+   * First tries the app menu (faster, more reliable), falls back to Apps page filter.
    */
   async isModuleInstalled(moduleName: string): Promise<boolean> {
+    // Primary: check via home menu — most reliable for user-facing apps
+    const inMenu = await this.appMenu.isAppInstalled(moduleName);
+    if (inMenu) return true;
+
+    // Fallback: check via Apps page with Installed filter
     const installed = await this.getInstalledModules();
     return installed.some(name =>
       name.toLowerCase().includes(moduleName.toLowerCase())
@@ -95,18 +104,34 @@ export class SettingsPage {
     await searchInput.press('Enter');
     await this.page.waitForTimeout(1000);
 
-    // Find the module card and click Install
+    // Find the module card and click Install/Activate
     // o_kanban_record: Odoo kanban card (version-sensitive class)
+    // Odoo 19 uses "Activate" instead of "Install" for module activation
     const moduleCard = this.page.locator('.o_kanban_record', { hasText: moduleName }).first();
     const installButton = moduleCard.getByRole('button', { name: 'Install' });
+    const activateButton = moduleCard.getByRole('button', { name: 'Activate' });
 
-    if (await installButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await installButton.click();
+    const targetButton = await activateButton.isVisible({ timeout: 3000 }).catch(() => false)
+      ? activateButton
+      : installButton;
+
+    if (await targetButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await targetButton.click();
+
+      // Odoo 19 may show a confirmation dialog for module activation
+      // o_dialog: Odoo dialog container (version-sensitive class)
+      const dialog = this.page.locator('.o_dialog, .modal');
+      if (await dialog.isVisible({ timeout: 3000 }).catch(() => false)) {
+        const confirmButton = dialog.getByRole('button', { name: /install|activate|ok|confirm/i });
+        if (await confirmButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await confirmButton.click();
+        }
+      }
 
       // Module installation can take a while — wait for page reload/refresh
       // The page typically reloads after installation
-      await this.page.waitForTimeout(10000);
-      await this.page.locator('.o_action_manager').waitFor({ state: 'visible', timeout: 60000 });
+      await this.page.waitForTimeout(15000);
+      await this.page.locator('.o_action_manager').waitFor({ state: 'visible', timeout: 120000 });
     }
   }
 }

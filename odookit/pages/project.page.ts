@@ -1,11 +1,18 @@
 import { type Page } from '@playwright/test';
 import { AppMenuPage } from './app-menu.page.js';
+import { dismissNotifications } from '../helpers/dismiss-notifications.js';
 
 /**
- * Odoo 19 Project Module — Project and task management
+ * Odoo 19 Project Module -- Project and task management
  *
  * Methods cover: project creation, task creation with optional assignment,
  * navigation, and stage changes.
+ *
+ * Odoo 19 project creation uses a dialog ("Create a Project") with:
+ *   - Name field (placeholder "e.g. Office Party")
+ *   - "Create project" / "Discard" buttons
+ *
+ * Task creation in kanban uses quick-create with a name input and Enter to confirm.
  */
 export class ProjectPage {
   readonly page: Page;
@@ -16,35 +23,42 @@ export class ProjectPage {
     this.appMenu = new AppMenuPage(page);
   }
 
-  /** Navigate to the Project module via the app menu. */
+  /** Navigate to the Project module via direct URL. */
   async openProjects(): Promise<void> {
     await this.appMenu.openApp('Project');
   }
 
   /**
    * Create a new project.
-   * Clicks "New" in the project list/kanban, fills the name, and confirms.
+   * Odoo 19 shows a "Create a Project" dialog after clicking "New".
    */
   async createProject(name: string): Promise<void> {
     await this.page.getByRole('button', { name: 'New' }).click();
-
-    // The project creation may be a quick-create input or a dialog
-    const nameInput = this.page.locator('input[name="name"]').first();
-    await nameInput.fill(name);
-
-    // Wait for any onchange responses
     await this.page.waitForTimeout(500);
 
-    // Try to confirm — could be a dialog button or form save
-    const createButton = this.page.getByRole('button', { name: 'Create' });
-    if (await createButton.isVisible({ timeout: 1000 }).catch(() => false)) {
-      await createButton.click();
-    } else {
-      // o_form_button_save: Odoo form save button (version-sensitive class)
-      const saveButton = this.page.locator('.o_form_button_save');
-      if (await saveButton.isVisible()) {
-        await saveButton.click();
-      }
+    // Odoo 19: "Create a Project" dialog with Name field
+    // Try the dialog Name textbox first
+    const dialogNameField = this.page.getByRole('textbox', { name: /name/i });
+    const fallbackInput = this.page.locator('input[name="name"]').first();
+
+    const nameTarget = await dialogNameField.isVisible({ timeout: 3000 }).catch(() => false)
+      ? dialogNameField
+      : fallbackInput;
+
+    await nameTarget.fill(name);
+    await this.page.waitForTimeout(500);
+
+    // Click "Create project" button (Odoo 19 dialog) or "Create" or save
+    const createProjectBtn = this.page.getByRole('button', { name: /create project/i });
+    const createBtn = this.page.getByRole('button', { name: 'Create' });
+    const saveBtn = this.page.locator('.o_form_button_save');
+
+    if (await createProjectBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await createProjectBtn.click();
+    } else if (await createBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await createBtn.click();
+    } else if (await saveBtn.isVisible()) {
+      await saveBtn.click();
     }
 
     await this.page.waitForTimeout(1000);
@@ -54,52 +68,81 @@ export class ProjectPage {
    * Open an existing project by name from the project list/kanban.
    */
   async openProject(name: string): Promise<void> {
-    await this.page.getByText(name, { exact: false }).first().click();
+    // Wait for projects to load
+    await this.page.locator('.o_action_manager .o_view_controller').waitFor({ state: 'visible', timeout: 10000 });
+    await this.page.waitForTimeout(500);
+
+    // Dismiss notification banners that can intercept clicks
+    await dismissNotifications(this.page);
+
+    await this.page.getByText(name, { exact: false }).first().click({ force: true });
     // Wait for the view controller to load the project's tasks
-    // o_action_manager .o_view_controller: Odoo view container (version-sensitive classes)
-    await this.page.locator('.o_action_manager .o_view_controller').waitFor({ state: 'visible' });
+    await this.page.locator('.o_action_manager .o_view_controller').waitFor({ state: 'visible', timeout: 10000 });
+    await this.page.waitForTimeout(500);
   }
 
   /**
    * Create a task within a project.
-   * Opens the project first, then creates a new task.
+   * Opens the project first, then creates a new task via kanban quick-create.
    */
   async createTask(projectName: string, taskName: string, options?: { assignee?: string }): Promise<void> {
     await this.openProject(projectName);
 
-    // Click "New" to create a task (may be quick-create in kanban or form-based)
-    await this.page.getByRole('button', { name: 'New' }).click();
+    // Click "New" or the quick-add button to create a task
+    const newBtn = this.page.getByRole('button', { name: 'New' });
+    await newBtn.click();
     await this.page.waitForTimeout(500);
 
-    // Fill task name — could be a kanban quick-create input or a form field
-    const nameInput = this.page.locator('input[name="name"], input[name="display_name"]').first();
-    await nameInput.fill(taskName);
+    // Fill task name -- Odoo 19 may open a full form view with "Task Title..." placeholder
+    // or a kanban quick-create input
+    const formTitleField = this.page.getByRole('textbox', { name: /task title/i });
+    const nameInput = this.page.getByRole('textbox', { name: /name/i }).first();
+    const fallbackInput = this.page.locator('input[name="name"], input[name="display_name"]').first();
+
+    let nameTarget;
+    if (await formTitleField.isVisible({ timeout: 3000 }).catch(() => false)) {
+      nameTarget = formTitleField;
+    } else if (await nameInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+      nameTarget = nameInput;
+    } else {
+      nameTarget = fallbackInput;
+    }
+
+    await nameTarget.fill(taskName);
     await this.page.waitForTimeout(300);
 
-    // Press Enter to confirm quick-create, or the input triggers a form
-    await nameInput.press('Enter');
+    // In form view: save via the save button or keyboard shortcut
+    // In kanban quick-create: press Enter or click Add
+    const saveManually = this.page.getByRole('button', { name: 'Save manually' });
+    const addBtn = this.page.getByRole('button', { name: 'Add' });
+    const saveBtn = this.page.locator('.o_form_button_save');
+
+    if (await saveManually.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await saveManually.click();
+    } else if (await addBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await addBtn.click();
+    } else if (await saveBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await saveBtn.click();
+    } else {
+      await nameTarget.press('Enter');
+    }
     await this.page.waitForTimeout(500);
 
     // If assignee is specified, open the task and set it
     if (options?.assignee) {
       await this.openTask(taskName);
 
-      // Many2many assignee field — type the user name and select from dropdown
       const assigneeInput = this.page.locator('.o_field_many2many[name="user_ids"] input, input[name="user_ids"]').first();
       if (await assigneeInput.isVisible({ timeout: 2000 }).catch(() => false)) {
         await assigneeInput.fill(options.assignee);
         await this.page.waitForTimeout(500);
-        // Select first dropdown result
-        // ui-autocomplete: jQuery UI autocomplete dropdown (version-sensitive class)
-        await this.page.locator('.ui-autocomplete .ui-menu-item, .o_m2o_dropdown_option').first().click();
+        await this.page.locator('.o-autocomplete--dropdown-item, .o_m2o_dropdown_option, .ui-menu-item').first().click();
         await this.page.waitForTimeout(500);
       }
 
-      // Save the form
-      // o_form_button_save: Odoo form save button (version-sensitive class)
-      const saveButton = this.page.locator('.o_form_button_save');
-      if (await saveButton.isVisible()) {
-        await saveButton.click();
+      const saveBtn = this.page.locator('.o_form_button_save');
+      if (await saveBtn.isVisible()) {
+        await saveBtn.click();
       }
       await this.page.waitForTimeout(500);
     }
@@ -109,18 +152,55 @@ export class ProjectPage {
    * Open an existing task by name from the task kanban/list view.
    */
   async openTask(taskName: string): Promise<void> {
-    await this.page.getByText(taskName, { exact: false }).first().click();
+    await dismissNotifications(this.page);
+    await this.page.getByText(taskName, { exact: false }).first().click({ force: true });
     // o_form_view: Odoo form view container (version-sensitive class)
-    await this.page.locator('.o_form_view').waitFor({ state: 'visible' });
+    await this.page.locator('.o_form_view').waitFor({ state: 'visible', timeout: 10000 });
   }
 
   /**
-   * Change the stage of the currently open task via the status bar.
+   * Change the stage of the currently open task via the stage dropdown.
+   *
+   * Odoo 19 project tasks use a dropdown button for stage selection
+   * (not CRM-style status bar buttons). The current stage is shown as
+   * a button inside the form view; clicking it reveals a dropdown
+   * with all available stages.
    */
   async setTaskStage(stageName: string): Promise<void> {
-    // o_statusbar_status: Odoo status bar with stage buttons (version-sensitive class)
-    const stageButton = this.page.locator('.o_statusbar_status button', { hasText: stageName });
-    await stageButton.click();
+    await dismissNotifications(this.page);
+
+    // Odoo 19 project tasks: try the status bar buttons first (CRM-style)
+    const statusBarButton = this.page.locator('.o_statusbar_status button', { hasText: stageName });
+    if (await statusBarButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await statusBarButton.click({ force: true });
+      await this.page.waitForTimeout(1000);
+      return;
+    }
+
+    // Odoo 19 project tasks: the stage dropdown button is inside the form
+    // sheet content area, next to the task title and priority stars.
+    // Use the main content area locator to avoid matching control panel buttons.
+    const mainContent = this.page.locator('main .o_form_view, .o_form_view .o_form_sheet_bg');
+    const stageBtn = mainContent.locator('button').filter({ hasText: /in progress|done|cancelled|changes requested|approved|new/i }).first();
+
+    const target = stageBtn;
+
+    await target.click();
+    await this.page.waitForTimeout(500);
+
+    // Select the desired stage from the dropdown menu
+    const stageOption = this.page.getByRole('menuitem', { name: stageName });
+    const dropdownItem = this.page.locator('.dropdown-menu .dropdown-item, .o-dropdown--menu .dropdown-item', { hasText: stageName });
+
+    if (await stageOption.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await stageOption.click();
+    } else if (await dropdownItem.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+      await dropdownItem.first().click();
+    } else {
+      // Fallback: click text inside form view only (not control panel)
+      await this.page.locator('.o_form_view').getByText(stageName, { exact: true }).first().click();
+    }
+
     await this.page.waitForTimeout(1000);
   }
 }

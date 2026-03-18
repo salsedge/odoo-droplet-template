@@ -1,6 +1,7 @@
 import { test as base, type Page } from '@playwright/test';
 export { expect } from '@playwright/test';
 import { LoginPage } from '../pages/login.page.js';
+import { dismissNotifications } from '../helpers/dismiss-notifications.js';
 
 /**
  * Auth fixtures — provide pre-authenticated browser contexts for tests.
@@ -27,6 +28,9 @@ export const test = base.extend<AuthFixtures>({
       process.env.ADMIN_LOGIN!,
       process.env.ADMIN_PASSWORD!
     );
+
+    // Dismiss "Your password is the default" and other notification banners
+    await dismissNotifications(page);
 
     await use(page);
     await context.close();

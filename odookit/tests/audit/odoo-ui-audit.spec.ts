@@ -13,8 +13,13 @@ import { AppMenuPage } from '../../pages/app-menu.page.js';
  * whether to remediate. For now, tests simply pass/fail.
  */
 test.describe('Odoo UI audit', () => {
+  // Detect local Docker environment (no Nginx, no list_db=False)
+  const isLocal = (process.env.BASE_URL ?? 'http://localhost:8069').includes('localhost');
+
   test('database manager is disabled', async ({ adminPage }) => {
     // ODOO-05 / PROXY-04: Database manager must be blocked
+    // Requires Nginx 403 on /web/database/* and list_db=False — skips on local Docker
+    test.skip(isLocal, 'Database manager block requires Nginx — skipping on local Docker');
     const settings = new SettingsPage(adminPage);
     const isDisabled = await settings.isDatabaseManagerDisabled();
 
@@ -37,9 +42,8 @@ test.describe('Odoo UI audit', () => {
 
   test('admin master password is not default', async ({ adminPage }) => {
     // ODOO-05: Verify database manager route is blocked.
-    // Rather than testing default passwords (which would require access to the manager),
-    // we verify the route is completely inaccessible — which is sufficient per PROXY-04.
-    // The Nginx config returns 403 on /web/database/*, and list_db = False in odoo.conf.
+    // Requires Nginx 403 on /web/database/* — skips on local Docker
+    test.skip(isLocal, 'Database manager block requires Nginx — skipping on local Docker');
 
     const response = await adminPage.goto('/web/database/manager');
 
@@ -70,11 +74,17 @@ test.describe('Odoo UI audit', () => {
     expect(await companyRow.isVisible()).toBe(true);
 
     await companyRow.click();
-    await adminPage.waitForTimeout(500);
+    await adminPage.waitForTimeout(1000);
 
-    // Verify company name is not the default placeholder
-    const nameInput = adminPage.locator('input[name="name"]');
-    const companyName = await nameInput.inputValue();
+    // Odoo 19: company name uses a widget field, not a standard input.
+    // Try the textbox role first, then fall back to input[name="name"].
+    const nameTextbox = adminPage.locator('.o_field_widget[name="name"] input').first();
+    const nameInputFallback = adminPage.locator('input[name="name"]');
+    const nameTarget = await nameTextbox.isVisible({ timeout: 3000 }).catch(() => false)
+      ? nameTextbox
+      : nameInputFallback;
+
+    const companyName = await nameTarget.inputValue();
 
     expect(companyName.length).toBeGreaterThan(0);
     // Warn (but still pass) if using Odoo default — real audit would flag this
