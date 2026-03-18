@@ -26,6 +26,16 @@ Two cron jobs run daily (in `/etc/cron.d/odoo-backup`):
 - Remote (DO Spaces): 30 days (managed by Spaces lifecycle rule)
 - Weekly = Sunday's daily backup promoted to `weekly/` directory
 
+**Remote retention depends on a Spaces lifecycle rule.** The backup scripts handle local cleanup automatically, but Spaces expiration requires a lifecycle rule configured on the `odoo-prod-backups` bucket. To verify the rule is active:
+
+```bash
+aws s3api get-bucket-lifecycle-configuration \
+  --endpoint-url https://nyc3.digitaloceanspaces.com \
+  --bucket odoo-prod-backups
+```
+
+If the command returns an error or no rules, backups will accumulate indefinitely. See the [Deployment Runbook](deployment-runbook.md) Step 2 (item 4) for full setup instructions using either the DO Console or awscli.
+
 ### Manual backup
 
 ```bash

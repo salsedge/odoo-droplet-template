@@ -119,6 +119,51 @@ Also create the backup bucket:
 1. Create a new Space named `odoo-prod-backups` in the `nyc3` region
 2. Choose **Cold Storage** tier (3x cheaper, suitable for infrequently accessed backups)
 3. Set access to **Restrict File Listing**
+4. **Configure a 30-day lifecycle expiration rule** to automatically delete old backups
+
+   Without this rule, `rclone copy` accumulates backups indefinitely on Spaces. On Cold Storage every object incurs a minimum 30-day storage charge regardless, so expiring at 30 days is the cost-optimal retention window.
+
+   **Method A -- DO Console:**
+   - Open the `odoo-prod-backups` Space in the DigitalOcean control panel
+   - Go to **Settings** > **Lifecycle Rules**
+   - Add a rule: Prefix = *(leave blank for all objects)*, Expiration = **30 days**
+   - Save
+
+   **Method B -- awscli (S3-compatible):**
+
+   Create a file called `lifecycle.json`:
+
+   ```json
+   {
+     "Rules": [
+       {
+         "ID": "expire-backups-30d",
+         "Status": "Enabled",
+         "Filter": { "Prefix": "" },
+         "Expiration": { "Days": 30 }
+       }
+     ]
+   }
+   ```
+
+   Apply it:
+
+   ```bash
+   aws s3api put-bucket-lifecycle-configuration \
+     --endpoint-url https://nyc3.digitaloceanspaces.com \
+     --bucket odoo-prod-backups \
+     --lifecycle-configuration file://lifecycle.json
+   ```
+
+   Verify the rule is active:
+
+   ```bash
+   aws s3api get-bucket-lifecycle-configuration \
+     --endpoint-url https://nyc3.digitaloceanspaces.com \
+     --bucket odoo-prod-backups
+   ```
+
+   Expected output should show the `expire-backups-30d` rule with `"Days": 30`.
 
 ### Initialize and apply Terraform
 
