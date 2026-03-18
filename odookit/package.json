@@ -1,0 +1,20 @@
+{
+  "name": "odookit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OdooKit — Playwright-based Odoo automation and verification toolkit",
+  "scripts": {
+    "test:local": "npx playwright test --project=local",
+    "test:prod": "npx playwright test --project=production",
+    "test:smoke": "npx playwright test --project=local tests/smoke/",
+    "setup:local": "npx playwright test --project=local tests/setup/ && echo \"UAT Ready\"",
+    "teardown:local": "docker compose down -v"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58",
+    "@types/node": "^22",
+    "dotenv": "^16",
+    "typescript": "^5"
+  }
+}
