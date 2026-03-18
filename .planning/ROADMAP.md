@@ -111,3 +111,12 @@ Note: Phase 5 (Monitoring) is blocked on external Icinga2 master availability.
 | 3. Backup, Recovery, and Documentation | 2/3 | In Progress | - |
 | 4. Deployment Verification and User Setup | 0/1 | Not started | - |
 | 5. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
+
+### Phase 6: Playwright E2E Testing and Odoo Verification
+
+**Goal:** [To be planned]
+**Depends on:** Phase 5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)

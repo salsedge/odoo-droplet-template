@@ -39,6 +39,10 @@ Progress: [████████░░] 80%
 
 ## Accumulated Context
 
+### Roadmap Evolution
+
+- Phase 6 added: Playwright E2E Testing and Odoo Verification
+
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
