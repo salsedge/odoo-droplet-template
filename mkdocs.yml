@@ -1,0 +1,73 @@
+site_name: Odoo 19.x Production Build
+site_description: Infrastructure-as-Code deployment of Odoo Community 19.x on DigitalOcean
+site_author: SALS Edge / Bibbeo Infrastructure
+
+repo_url: https://github.com/bibbeo/odoo-19.x-build
+edit_uri: edit/main/docs/
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Deployment:
+    - Runbook: deployment-runbook.md
+    - Enterprise Migration: enterprise-migration.md
+  - Operations: operations.md
+  - Reference:
+    - Requirements: reference/requirements.md
+    - Product Requirements: PRD.md
+    - Key Decisions: reference/decisions.md
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.share
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
