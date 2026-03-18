@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap delivers a production-ready Odoo Community deployment on DigitalOcean in five phases, moving from bare Terraform project to a fully hardened, backed-up, and monitored Odoo instance behind Nginx/SSL -- verified end-to-end with real users. Phase 1 provisions all DigitalOcean infrastructure via Terraform. Phase 2 is the core build -- hardening the host, deploying the Docker application stack, and configuring Nginx with SSL -- turning a bare droplet into a working Odoo instance. Phase 3 completes backup automation, tested restore procedures, and comprehensive documentation. Phase 4 creates real user accounts and verifies the entire system end-to-end -- confirming that every prior phase works together in production with actual users. Phase 5 adds Icinga2 monitoring for operational visibility once the external Icinga2 master is built and ready. WireGuard VPN is deferred to v2; this is a single-droplet architecture.
+This roadmap delivers a production-ready Odoo Community deployment on DigitalOcean in six phases, moving from bare Terraform project to a fully hardened, backed-up, E2E-tested, and monitored Odoo instance behind Nginx/SSL -- verified end-to-end with real users. Phase 1 provisions all DigitalOcean infrastructure via Terraform. Phase 2 is the core build -- hardening the host, deploying the Docker application stack, and configuring Nginx with SSL -- turning a bare droplet into a working Odoo instance. Phase 3 completes backup automation, tested restore procedures, and comprehensive documentation. Phase 4 adds Playwright E2E tests for post-deployment verification, backup restore validation, user management, and configuration auditing. Phase 5 uses the Playwright test suite to create real user accounts and verify the entire system end-to-end -- confirming that every prior phase works together in production with actual users. Phase 6 adds Icinga2 monitoring for operational visibility once the external Icinga2 master is built and ready. WireGuard VPN is deferred to v2; this is a single-droplet architecture.
 
 ## Phases
 
@@ -15,8 +15,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
 - [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
 - [x] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures (completed 2026-03-18)
-- [ ] **Phase 4: Deployment Verification and User Setup** - Create admin and regular user accounts, verify all system components work end-to-end with real users
-- [ ] **Phase 5: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
+- [ ] **Phase 4: Playwright E2E Testing and Odoo Verification** - Automated browser tests for post-deploy verification, backup restore validation, user management, and configuration auditing
+- [ ] **Phase 5: Deployment Verification and User Setup** - Use Playwright test suite to create user accounts and verify all system components end-to-end with real users
+- [ ] **Phase 6: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
 
 ## Phase Details
 
@@ -70,9 +71,17 @@ Plans:
 - [x] 03-02-PLAN.md -- Documentation (architecture overview, deployment runbook, operational procedures, enterprise migration guide) (Wave 1)
 - [x] 03-03-PLAN.md -- Gap closure: Add DO Spaces 30-day lifecycle rule instructions to deployment runbook and operations doc (Wave 1, gap_closure)
 
-### Phase 4: Deployment Verification and User Setup
-**Goal**: An admin and a regular user are set up in Odoo, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
+### Phase 4: Playwright E2E Testing and Odoo Verification
+**Goal**: [To be planned]
 **Depends on**: Phase 3
+**Plans**: 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 4 to break down)
+
+### Phase 5: Deployment Verification and User Setup
+**Goal**: An admin and a regular user are set up in Odoo using Playwright tests from Phase 4, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
+**Depends on**: Phase 4
 **Requirements**: Cross-cutting verification of Phases 1-3 (IAC, HARD, DOCK, ODOO, PG, PROXY, BACK, DOC)
 **Success Criteria** (what must be TRUE):
   1. An admin user can log in to Odoo, access Settings, install/configure CRM and Project modules, and manage user accounts
@@ -82,9 +91,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 05-01: TBD
 
-### Phase 5: Monitoring
+### Phase 6: Monitoring
 **Goal**: The Odoo host reports health status to the existing Icinga2 master -- container failures, PostgreSQL issues, and system resource exhaustion trigger alerts without manual log inspection
 **Depends on**: Phase 2 + external Icinga2 master must be built and operational
 **Requirements**: MON-01, MON-02, MON-03, MON-04, MON-05
@@ -96,27 +105,19 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 06-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
-Note: Phase 5 (Monitoring) is blocked on external Icinga2 master availability.
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+Note: Phase 6 (Monitoring) is blocked on external Icinga2 master availability.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
-| 3. Backup, Recovery, and Documentation | 2/3 | In Progress | - |
-| 4. Deployment Verification and User Setup | 0/1 | Not started | - |
-| 5. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
-
-### Phase 6: Playwright E2E Testing and Odoo Verification
-
-**Goal:** [To be planned]
-**Depends on:** Phase 5
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+| 3. Backup, Recovery, and Documentation | 3/3 | Complete    | 2026-03-18 |
+| 4. Playwright E2E Testing and Odoo Verification | 0/0 | Not started | - |
+| 5. Deployment Verification and User Setup | 0/1 | Not started | - |
+| 6. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
