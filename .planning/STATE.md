@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 4 of 6 (Playwright E2E Testing and Odoo Verification)
-Plan: 1 of 4 executed in current phase (04-01 complete)
-Status: Executing Phase 4 — OdooKit scaffold complete, test files next
-Last activity: 2026-03-18 -- Executed 04-01 (OdooKit project scaffold)
+Plan: 2 of 4 executed in current phase (04-02 complete)
+Status: Executing Phase 4 — Smoke and workflow tests complete, setup tests next
+Last activity: 2026-03-18 -- Executed 04-02 (Smoke and workflow tests)
 
-Progress: [████████░░] 82%
+Progress: [████████░░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 2.8 min
-- Total execution time: 0.42 hours
+- Total execution time: 0.47 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [████████░░] 82%
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 | 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
 | 3 - Backup, Recovery, and Documentation | 3 | 12 min | 4.0 min |
-| 4 - Playwright E2E Testing | 1 | 4 min | 4.0 min |
+| 4 - Playwright E2E Testing | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4 min), 03-01 (5 min), 03-02 (6 min), 03-03 (1 min), 04-01 (4 min)
+- Last 5 plans: 03-01 (5 min), 03-02 (6 min), 03-03 (1 min), 04-01 (4 min), 04-02 (3 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -96,6 +96,10 @@ Recent decisions affecting current work:
 - [04-01]: Role-based and text locators preferred over Odoo CSS classes; o_ classes isolated in POMs with version-sensitivity comments
 - [04-01]: Form-based stage changes instead of kanban drag-and-drop for CRM/Project reliability
 - [04-01]: testUserPage fixture skips gracefully when credentials not set
+- [04-02]: Smoke tests self-contained (no auth fixture); module checks use adminPage from auth fixture
+- [04-02]: Workflow tests skip on production via PROD_ODOO_URL env var comparison in beforeEach
+- [04-02]: Serial execution (test.describe.serial) for workflow tests with dependent test state
+- [04-02]: Date.now() suffix for unique test data names to prevent collisions across runs
 
 ### Pending Todos
 
@@ -110,5 +114,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 04-01-PLAN.md (OdooKit project scaffold with Playwright, POMs, and auth fixtures)
+Stopped at: Completed 04-02-PLAN.md (Smoke and workflow tests for login, health, modules, CRM, Project)
 Resume file: None
