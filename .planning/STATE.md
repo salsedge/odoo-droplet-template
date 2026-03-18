@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Run `terraform apply` and get a fully hardened, monitored Odoo deployment with Nginx/SSL -- reproducible, secure, and production-ready from day one.
-**Current focus:** Phase 2: Hardened Application Stack
+**Current focus:** Phase 3: Backup, Recovery, and Documentation
 
 ## Current Position
 
-Phase: 2 of 5 (Hardened Application Stack) -- COMPLETE
-Plan: 3 of 3 executed in current phase (02-01, 02-02, 02-03 all complete)
-Status: Phase 2 complete, ready for Phase 3
-Last activity: 2026-03-12 -- Executed 02-01 (Host Hardening & Docker Installation)
+Phase: 3 of 5 (Backup, Recovery, and Documentation) -- COMPLETE
+Plan: 3 of 3 executed in current phase (03-01, 03-02, 03-03 all complete)
+Status: Phase 3 complete (including gap closure), ready for Phase 4 (Deployment Verification and User Setup)
+Last activity: 2026-03-18 -- Executed 03-03 (Spaces Lifecycle Rule Documentation)
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 2.4 min
-- Total execution time: 0.2 hours
+- Total plans completed: 8
+- Average duration: 2.6 min
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████░░░░] 60%
 |-------|-------|-------|----------|
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 | 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
+| 3 - Backup, Recovery, and Documentation | 3 | 12 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-02 (3 min), 02-03 (3 min), 02-01 (4 min)
+- Last 5 plans: 02-03 (3 min), 02-01 (4 min), 03-01 (5 min), 03-02 (6 min), 03-03 (1 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -46,7 +47,8 @@ Recent decisions affecting current work:
 - [Roadmap]: WireGuard VPN deferred to v2 -- single droplet architecture simplifies phases
 - [Roadmap]: Nginx host-installed (not containerized) for simpler certbot integration
 - [Roadmap]: Icinga2 agent host-installed (not containerized) to retain Docker daemon failure visibility
-- [Roadmap]: Added Phase 5 for end-to-end deployment verification with real user accounts
+- [Roadmap]: Added end-to-end deployment verification with real user accounts (now Phase 4)
+- [Roadmap]: Reordered phases — Monitoring moved from Phase 3 to Phase 5, blocked on external Icinga2 master build. Backup/Docs→Phase 3, Verification→Phase 4
 - [01-01]: Flat Terraform layout in infra/ (single file per concern, no modules)
 - [01-01]: Backend bucket hardcoded (Terraform backend blocks cannot use variables)
 - [01-01]: Env vars preferred for secrets (DIGITALOCEAN_TOKEN, AWS_ACCESS_KEY_ID/SECRET)
@@ -73,7 +75,17 @@ Recent decisions affecting current work:
 - [02-03]: DNS resolver (1.1.1.1/1.0.0.1) required for OCSP stapling -- added during execution
 - [02-03]: DNS pre-check before certbot prevents wasted rate-limited attempts
 - [02-03]: HTTP-01 challenge (not DNS-01) for simpler setup without DO API token
-- [Infra]: Two Spaces buckets — `odoo-prod-tfstate` (Standard) for TF state, `odoo-prod-backups` (Cold Storage) for Phase 4 backups. Cold Storage is 3x cheaper but has 30-day retention + retrieval fees, unsuitable for frequently accessed state files
+- [Infra]: Two Spaces buckets — `odoo-prod-tfstate` (Standard) for TF state, `odoo-prod-backups` (Cold Storage) for Phase 3 backups. Cold Storage is 3x cheaper but has 30-day retention + retrieval fees, unsuitable for frequently accessed state files
+- [03-01]: Status file uses Nagios convention (0=OK, 2=CRITICAL) for Phase 5 Icinga2 integration
+- [03-01]: Offsite sync writes separate sync-status.json alongside backup-status.json
+- [03-01]: Restore script defaults to verify-only mode (requires explicit --production for live restore)
+- [03-01]: rclone.conf.example uses SPACES_REGION_PLACEHOLDER for endpoint to support non-nyc3 regions
+- [03-01]: Retention cleanup runs BEFORE new backup to free space first
+- [03-02]: ASCII + Mermaid dual diagrams for terminal and GitHub rendering
+- [03-02]: Deployment runbook structured as 9 numbered steps matching script execution order
+- [03-02]: Operations doc uses numbered self-contained sections for jump-to-procedure access
+- [03-02]: Enterprise migration covers bind-mount approach (more portable than private registry)
+- [03-03]: Dual methods for lifecycle rule setup: DO Console (GUI) and awscli (CLI) for operator flexibility
 
 ### Pending Todos
 
@@ -83,10 +95,10 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - [Phase 2]: Verify Odoo 19 Docker image availability on Docker Hub before execution (may need version pin or 18 fallback)
-- [Phase 3]: Icinga2 agent-to-master registration workflow requires coordination with existing master admin
+- [Phase 5]: Icinga2 agent-to-master registration workflow requires coordination with existing master admin — blocked until Icinga2 master is built
 
 ## Session Continuity
 
-Last session: 2026-03-12
-Stopped at: Completed 02-01-PLAN.md (Host Hardening & Docker Installation) -- Phase 2 complete
+Last session: 2026-03-18
+Stopped at: Completed 03-03-PLAN.md (Spaces Lifecycle Rule Documentation) -- Phase 3 fully complete (gap closure done)
 Resume file: None

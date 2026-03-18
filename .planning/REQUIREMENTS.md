@@ -71,17 +71,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Backup and Recovery
 
-- [ ] **BACK-01**: Automated daily pg_dump to local DO Block Storage Volume
-- [ ] **BACK-02**: Automated sync of backups to DO Spaces via rclone
-- [ ] **BACK-03**: Backup retention policy (7 daily, 4 weekly on local; 30 days on Spaces)
-- [ ] **BACK-04**: Documented and tested restore procedure with verification script
+- [x] **BACK-01**: Automated daily pg_dump to local DO Block Storage Volume
+- [x] **BACK-02**: Automated sync of backups to DO Spaces via rclone
+- [x] **BACK-03**: Backup retention policy (7 daily, 4 weekly on local; 30 days on Spaces)
+- [x] **BACK-04**: Documented and tested restore procedure with verification script
 
 ### Documentation
 
-- [ ] **DOC-01**: Architecture overview document with network topology diagram
-- [ ] **DOC-02**: Deployment runbook (step-by-step from fresh clone to running Odoo)
-- [ ] **DOC-03**: Operational procedures (backup, restore, update Odoo, scale resources)
-- [ ] **DOC-04**: Short getting-started document for Enterprise edition migration path
+- [x] **DOC-01**: Architecture overview document with network topology diagram
+- [x] **DOC-02**: Deployment runbook (step-by-step from fresh clone to running Odoo)
+- [x] **DOC-03**: Operational procedures (backup, restore, update Odoo, scale resources)
+- [x] **DOC-04**: Short getting-started document for Enterprise edition migration path
 
 ## v2 Requirements
 
@@ -166,21 +166,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROXY-03 | Phase 2 | Complete |
 | PROXY-04 | Phase 2 | Complete |
 | PROXY-05 | Phase 2 | Complete |
-| MON-01 | Phase 3 | Pending |
-| MON-02 | Phase 3 | Pending |
-| MON-03 | Phase 3 | Pending |
-| MON-04 | Phase 3 | Pending |
-| MON-05 | Phase 3 | Pending |
-| BACK-01 | Phase 4 | Pending |
-| BACK-02 | Phase 4 | Pending |
-| BACK-03 | Phase 4 | Pending |
-| BACK-04 | Phase 4 | Pending |
-| DOC-01 | Phase 4 | Pending |
-| DOC-02 | Phase 4 | Pending |
-| DOC-03 | Phase 4 | Pending |
-| DOC-04 | Phase 4 | Pending |
+| BACK-01 | Phase 3 | Complete |
+| BACK-02 | Phase 3 | Complete |
+| BACK-03 | Phase 3 | Complete |
+| BACK-04 | Phase 3 | Complete |
+| DOC-01 | Phase 3 | Complete |
+| DOC-02 | Phase 3 | Complete |
+| DOC-03 | Phase 3 | Complete |
+| DOC-04 | Phase 3 | Complete |
+| MON-01 | Phase 5 | Pending |
+| MON-02 | Phase 5 | Pending |
+| MON-03 | Phase 5 | Pending |
+| MON-04 | Phase 5 | Pending |
+| MON-05 | Phase 5 | Pending |
 
-**Phase 5 note:** Phase 5 (Deployment Verification and User Setup) introduces no new requirements. It is a cross-cutting integration verification phase that validates all 48 existing requirements work together end-to-end with real user accounts.
+**Phase 4 note:** Phase 4 (Deployment Verification and User Setup) introduces no new requirements. It is a cross-cutting integration verification phase that validates Phases 1-3 requirements work together end-to-end with real user accounts. MON requirements are verified separately in Phase 5 when the Icinga2 master is available.
 
 **Coverage:**
 - v1 requirements: 48 total
@@ -189,4 +189,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after roadmap revision (Phase 5 added)*
+*Last updated: 2026-03-17 after phase reorder (Monitoring moved from Phase 3 to Phase 5, blocked on external Icinga2 master)*

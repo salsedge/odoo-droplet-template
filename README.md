@@ -25,8 +25,8 @@ Single-droplet architecture in a DO VPC. Docker dual-network isolation: `fronten
 - **PCI-DSS host hardening** — SSH (key-only, port 9292), UFW, fail2ban, sysctl, auditd, auto-updates
 - **Containerized stack** — Odoo 19 + PostgreSQL 18 via Docker Compose with resource limits, health checks, non-root
 - **Nginx + Let's Encrypt** — HTTPS with HSTS, security headers, auto-renewal, database manager routes blocked
-- **Icinga2 monitoring** — Agent with custom checks for containers, PostgreSQL, and system resources (Phase 3)
-- **Automated backups** — Daily pg_dump to local + DO Spaces with tested restore procedure (Phase 4)
+- **Automated backups** — Daily pg_dump to local + DO Spaces with tested restore procedure (Phase 3)
+- **Icinga2 monitoring** — Agent with custom checks for containers, PostgreSQL, and system resources (Phase 5)
 
 ## Prerequisites
 
@@ -287,12 +287,12 @@ artifacts/              Original project specification
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | Terraform Foundation and Compute | Complete |
-| 2 | Hardened Application Stack | In Progress (scripts ready, pending execution) |
-| 3 | Monitoring (Icinga2) | Not Started |
-| 4 | Backup, Recovery, Documentation | Not Started |
-| 5 | Deployment Verification | Not Started |
+| 2 | Hardened Application Stack | Complete (scripts ready, pending execution) |
+| 3 | Backup, Recovery, Documentation | Not Started |
+| 4 | Deployment Verification | Not Started |
+| 5 | Monitoring (Icinga2) | Not Started (blocked on Icinga2 master) |
 
-**Overall Progress:** ~30%
+**Overall Progress:** ~40%
 
 See [.planning/ROADMAP.md](.planning/ROADMAP.md) for full phase details and success criteria.
 

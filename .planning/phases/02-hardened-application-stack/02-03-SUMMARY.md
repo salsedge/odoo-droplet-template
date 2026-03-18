@@ -125,7 +125,7 @@ sudo bash /tmp/odoo-setup/scripts/04-setup-nginx.sh odoo.example.com admin@examp
 ## Next Phase Readiness
 - Nginx/SSL configuration complete and ready for deployment
 - Setup script ready for execution on hardened droplet (after 02-01 and 02-02)
-- Phase 3 (Monitoring) can proceed once Phase 2 deployment is verified
+- Phase 3 (Backup, Recovery, and Documentation) can proceed once Phase 2 deployment is verified
 
 ## Self-Check: PASSED
 

@@ -1,0 +1,27 @@
+# =============================================================================
+# msmtp Configuration — SMTP Relay for Backup Failure Notifications
+# =============================================================================
+# Requirement: BACK-01 (failure notification)
+#
+# Template file — credentials are substituted from .env by 05-setup-backups.sh
+# Deployed to: /etc/msmtprc (system-wide for msmtp-mta, chmod 600)
+#
+# Common SMTP providers:
+#   - SendGrid: host=smtp.sendgrid.net, user=apikey, password=SG.xxx
+#   - Mailgun:  host=smtp.mailgun.org, user=postmaster@domain, password=xxx
+#   - Gmail:    host=smtp.gmail.com, user=you@gmail.com, password=app-password
+#   - Microsoft 365: host=smtp.office365.com, user=you@domain.com
+# =============================================================================
+
+defaults
+auth           on
+tls            on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile        /var/log/msmtp.log
+
+account        default
+host           SMTP_HOST_PLACEHOLDER
+port           SMTP_PORT_PLACEHOLDER
+from           SMTP_FROM_PLACEHOLDER
+user           SMTP_USER_PLACEHOLDER
+password       SMTP_PASSWORD_PLACEHOLDER

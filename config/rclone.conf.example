@@ -1,0 +1,20 @@
+# =============================================================================
+# rclone Configuration — DO Spaces S3 (Offsite Backup Sync)
+# =============================================================================
+# Requirement: BACK-02
+#
+# Template file — credentials are substituted from .env by 05-setup-backups.sh
+# Deployed to: /opt/odoo/rclone.conf (chmod 600)
+#
+# DO Spaces access keys are separate from the main DigitalOcean API token.
+# Generate at: DigitalOcean Control Panel > API > Spaces Keys
+# =============================================================================
+
+[spaces]
+type = s3
+provider = DigitalOcean
+env_auth = false
+access_key_id = SPACES_ACCESS_KEY_PLACEHOLDER
+secret_access_key = SPACES_SECRET_KEY_PLACEHOLDER
+endpoint = SPACES_REGION_PLACEHOLDER.digitaloceanspaces.com
+acl = private
