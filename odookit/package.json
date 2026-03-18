@@ -8,8 +8,12 @@
     "test:local": "npx playwright test --project=local",
     "test:prod": "npx playwright test --project=production",
     "test:smoke": "npx playwright test --project=local tests/smoke/",
-    "setup:local": "npx playwright test --project=local tests/setup/ && echo \"UAT Ready\"",
-    "teardown:local": "docker compose down -v"
+    "setup:local": "docker compose up -d --wait && npx playwright test --project=local tests/setup/ && node -e \"console.log('\\n--- UAT READY ---\\nOdoo: ' + (process.env.LOCAL_ODOO_URL || 'http://localhost:8069') + '\\nAdmin: ' + process.env.ADMIN_LOGIN + '\\nModules: CRM, Project installed\\nTest user: ' + (process.env.TEST_USER_LOGIN || 'not configured') + '\\n\\nTo tear down: npm run teardown:local')\"",
+    "teardown:local": "docker compose down -v",
+    "audit:infra": "bash scripts/infra-audit.sh",
+    "audit:ui": "npx playwright test --project=production tests/audit/odoo-ui-audit.spec.ts",
+    "audit:headers": "npx playwright test --project=production tests/audit/http-headers.spec.ts",
+    "audit:all": "npm run audit:ui && npm run audit:headers && npm run audit:infra"
   },
   "devDependencies": {
     "@playwright/test": "^1.58",
