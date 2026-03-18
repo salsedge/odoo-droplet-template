@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
 - [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
 - [x] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures (completed 2026-03-18)
-- [ ] **Phase 4: Playwright E2E Testing and Odoo Verification** - Automated browser tests for post-deploy verification, backup restore validation, user management, and configuration auditing
+- [x] **Phase 4: Playwright E2E Testing and Odoo Verification** - Automated browser tests for post-deploy verification, backup restore validation, user management, and configuration auditing (completed 2026-03-18)
 - [ ] **Phase 5: Deployment Verification and User Setup** - Use Playwright test suite to create user accounts and verify all system components end-to-end with real users
 - [ ] **Phase 6: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
 
@@ -86,10 +86,10 @@ Plans:
 **Plans**: 4 plans (3 waves)
 
 Plans:
-- [ ] 04-01-PLAN.md -- OdooKit scaffold, Docker Compose, helpers, Page Object Models, auth fixtures (Wave 1)
-- [ ] 04-02-PLAN.md -- Smoke tests (login, health, modules) and workflow tests (CRM lead, project task) (Wave 2, depends: 04-01)
-- [ ] 04-03-PLAN.md -- Setup automation, audit tests (UI + headers), infrastructure audit script, UAT handoff (Wave 2, depends: 04-01)
-- [ ] 04-04-PLAN.md -- Local stack verification and human checkpoint (Wave 3, depends: 04-02, 04-03)
+- [x] 04-01-PLAN.md -- OdooKit scaffold, Docker Compose, helpers, Page Object Models, auth fixtures (Wave 1)
+- [x] 04-02-PLAN.md -- Smoke tests (login, health, modules) and workflow tests (CRM lead, project task) (Wave 2, depends: 04-01)
+- [x] 04-03-PLAN.md -- Setup automation, audit tests (UI + headers), infrastructure audit script, UAT handoff (Wave 2, depends: 04-01)
+- [x] 04-04-PLAN.md -- Local stack verification and human checkpoint (Wave 3, depends: 04-02, 04-03)
 
 ### Phase 5: Deployment Verification and User Setup
 **Goal**: An admin and a regular user are set up in Odoo using Playwright tests from Phase 4, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
@@ -130,6 +130,6 @@ Note: Phase 6 (Monitoring) is blocked on external Icinga2 master availability.
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
 | 3. Backup, Recovery, and Documentation | 3/3 | Complete    | 2026-03-18 |
-| 4. Playwright E2E Testing and Odoo Verification | 0/4 | Not started | - |
+| 4. Playwright E2E Testing and Odoo Verification | 4/4 | Complete    | 2026-03-18 |
 | 5. Deployment Verification and User Setup | 0/1 | Not started | - |
 | 6. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |

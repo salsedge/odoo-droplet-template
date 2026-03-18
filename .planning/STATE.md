@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Run `terraform apply` and get a fully hardened, monitored Odoo deployment with Nginx/SSL -- reproducible, secure, and production-ready from day one.
-**Current focus:** Phase 4: Playwright E2E Testing and Odoo Verification
+**Current focus:** Phase 5: Deployment Verification and User Setup
 
 ## Current Position
 
-Phase: 4 of 6 (Playwright E2E Testing and Odoo Verification)
-Plan: 3 of 4 executed in current phase (04-03 complete)
-Status: Executing Phase 4 — Setup, audit, and infra verification complete
-Last activity: 2026-03-18 -- Executed 04-03 (Setup, audit, and infrastructure verification)
+Phase: 5 of 6 (Deployment Verification and User Setup)
+Plan: 0 of 1 executed in current phase
+Status: Phase 4 complete -- ready for Phase 5
+Last activity: 2026-03-18 -- Completed 04-04 (Local stack verification and human checkpoint)
 
-Progress: [█████████░] 88%
+Progress: [██████████] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 2.9 min
-- Total execution time: 0.57 hours
+- Total plans completed: 12
+- Average duration: 3.0 min
+- Total execution time: 0.63 hours
 
 **By Phase:**
 
@@ -30,14 +30,14 @@ Progress: [█████████░] 88%
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 | 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
 | 3 - Backup, Recovery, and Documentation | 3 | 12 min | 4.0 min |
-| 4 - Playwright E2E Testing | 3 | 13 min | 4.3 min |
+| 4 - Playwright E2E Testing | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (6 min), 03-03 (1 min), 04-01 (4 min), 04-02 (3 min), 04-03 (6 min)
+- Last 5 plans: 03-03 (1 min), 04-01 (4 min), 04-02 (3 min), 04-03 (6 min), 04-04 (5 min)
 - Trend: Stable
 
 *Updated after each plan completion*
-| Phase 04 P03 | 6min | 3 tasks | 7 files |
+| Phase 04 P04 | 5min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -105,6 +105,10 @@ Recent decisions affecting current work:
 - [04-03]: HTTP header tests skip on localhost via isLocalhost() helper (no Nginx/SSL locally)
 - [04-03]: infra-audit.sh uses SSH BatchMode with configurable host/port/user
 - [04-03]: setup:local script chains docker compose up, setup tests, and UAT handoff message
+- [04-04]: Direct URL navigation for Odoo 19 app routing (/odoo/crm, /odoo/project) instead of menu clicks
+- [04-04]: JS injection via page.evaluate() to dismiss notification banners reliably
+- [04-04]: Dropdown button pattern for project task stage transitions (Odoo 19 change from status bar)
+- [04-04]: PG 18 volume mount to /var/lib/postgresql/data/pgdata subdirectory (not root data dir)
 
 ### Pending Todos
 
@@ -119,5 +123,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 04-03-PLAN.md (Setup, audit, and infrastructure verification tests)
+Stopped at: Completed 04-04-PLAN.md (Local stack verification and human checkpoint) -- Phase 4 complete
 Resume file: None
