@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Run `terraform apply` and get a fully hardened, monitored Odoo deployment with Nginx/SSL -- reproducible, secure, and production-ready from day one.
-**Current focus:** Phase 3: Backup, Recovery, and Documentation
+**Current focus:** Phase 4: Playwright E2E Testing and Odoo Verification
 
 ## Current Position
 
-Phase: 3 of 5 (Backup, Recovery, and Documentation) -- COMPLETE
-Plan: 3 of 3 executed in current phase (03-01, 03-02, 03-03 all complete)
-Status: Phase 3 complete (including gap closure), ready for Phase 4 (Playwright E2E Testing and Odoo Verification)
-Last activity: 2026-03-18 -- Executed 03-03 (Spaces Lifecycle Rule Documentation)
+Phase: 4 of 6 (Playwright E2E Testing and Odoo Verification)
+Plan: 1 of 4 executed in current phase (04-01 complete)
+Status: Executing Phase 4 — OdooKit scaffold complete, test files next
+Last activity: 2026-03-18 -- Executed 04-01 (OdooKit project scaffold)
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 2.6 min
-- Total execution time: 0.35 hours
+- Total plans completed: 9
+- Average duration: 2.8 min
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [████████░░] 80%
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 | 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
 | 3 - Backup, Recovery, and Documentation | 3 | 12 min | 4.0 min |
+| 4 - Playwright E2E Testing | 1 | 4 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (3 min), 02-01 (4 min), 03-01 (5 min), 03-02 (6 min), 03-03 (1 min)
+- Last 5 plans: 02-01 (4 min), 03-01 (5 min), 03-02 (6 min), 03-03 (1 min), 04-01 (4 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -91,6 +92,10 @@ Recent decisions affecting current work:
 - [03-02]: Operations doc uses numbered self-contained sections for jump-to-procedure access
 - [03-02]: Enterprise migration covers bind-mount approach (more portable than private registry)
 - [03-03]: Dual methods for lifecycle rule setup: DO Console (GUI) and awscli (CLI) for operator flexibility
+- [04-01]: ES module type with NodeNext module resolution for native ESM compatibility
+- [04-01]: Role-based and text locators preferred over Odoo CSS classes; o_ classes isolated in POMs with version-sensitivity comments
+- [04-01]: Form-based stage changes instead of kanban drag-and-drop for CRM/Project reliability
+- [04-01]: testUserPage fixture skips gracefully when credentials not set
 
 ### Pending Todos
 
@@ -105,5 +110,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 03-03-PLAN.md (Spaces Lifecycle Rule Documentation) -- Phase 3 fully complete (gap closure done)
+Stopped at: Completed 04-01-PLAN.md (OdooKit project scaffold with Playwright, POMs, and auth fixtures)
 Resume file: None
