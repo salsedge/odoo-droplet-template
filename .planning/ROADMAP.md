@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
 - [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
-- [ ] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures
+- [x] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures (completed 2026-03-18)
 - [ ] **Phase 4: Deployment Verification and User Setup** - Create admin and regular user accounts, verify all system components work end-to-end with real users
 - [ ] **Phase 5: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
 
@@ -68,7 +68,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md -- Backup automation scripts (daily pg_dump + filestore tar, rclone offsite sync, restore + verification, setup script + config templates) (Wave 1)
 - [x] 03-02-PLAN.md -- Documentation (architecture overview, deployment runbook, operational procedures, enterprise migration guide) (Wave 1)
-- [ ] 03-03-PLAN.md -- Gap closure: Add DO Spaces 30-day lifecycle rule instructions to deployment runbook and operations doc (Wave 1, gap_closure)
+- [x] 03-03-PLAN.md -- Gap closure: Add DO Spaces 30-day lifecycle rule instructions to deployment runbook and operations doc (Wave 1, gap_closure)
 
 ### Phase 4: Deployment Verification and User Setup
 **Goal**: An admin and a regular user are set up in Odoo, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
