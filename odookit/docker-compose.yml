@@ -1,0 +1,58 @@
+# =============================================================================
+# OdooKit — Local staging stack (Odoo 19 + PostgreSQL 18)
+# =============================================================================
+# Simplified version of config/docker-compose.yml for local testing.
+# No resource limits, no block storage, no network isolation.
+# Data is ephemeral — `docker compose down -v` wipes everything.
+#
+# Requirements verified: DOCK-03, DOCK-05, ODOO-01, PG-01
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 18 — Local staging database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:18
+    container_name: odookit-db
+    environment:
+      POSTGRES_USER: ${LOCAL_POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD:-odoo_local_dev}
+      POSTGRES_DB: ${LOCAL_POSTGRES_DB:-odoo}
+    volumes:
+      # PG 18+ stores data in a major-version subdirectory under /var/lib/postgresql
+      # Mount at /var/lib/postgresql (not /data) per https://github.com/docker-library/postgres/pull/1259
+      - odookit-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LOCAL_POSTGRES_USER:-odoo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Odoo 19 — Local staging application
+  # ---------------------------------------------------------------------------
+  odoo:
+    image: odoo:19
+    container_name: odookit-odoo
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: db
+      PORT: 5432
+      USER: ${LOCAL_POSTGRES_USER:-odoo}
+      PASSWORD: ${LOCAL_POSTGRES_PASSWORD:-odoo_local_dev}
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8069/web/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  odookit-pgdata:

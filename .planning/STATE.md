@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Run `terraform apply` and get a fully hardened, monitored Odoo deployment with Nginx/SSL -- reproducible, secure, and production-ready from day one.
-**Current focus:** Phase 3: Backup, Recovery, and Documentation
+**Current focus:** Phase 5: Deployment Verification and User Setup
 
 ## Current Position
 
-Phase: 3 of 5 (Backup, Recovery, and Documentation) -- COMPLETE
-Plan: 3 of 3 executed in current phase (03-01, 03-02, 03-03 all complete)
-Status: Phase 3 complete (including gap closure), ready for Phase 4 (Playwright E2E Testing and Odoo Verification)
-Last activity: 2026-03-18 -- Executed 03-03 (Spaces Lifecycle Rule Documentation)
+Phase: 5 of 6 (Deployment Verification and User Setup)
+Plan: 0 of 1 executed in current phase
+Status: Phase 4 complete -- ready for Phase 5
+Last activity: 2026-03-18 -- Completed 04-04 (Local stack verification and human checkpoint)
 
-Progress: [████████░░] 80%
+Progress: [██████████] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 2.6 min
-- Total execution time: 0.35 hours
+- Total plans completed: 12
+- Average duration: 3.0 min
+- Total execution time: 0.63 hours
 
 **By Phase:**
 
@@ -30,12 +30,14 @@ Progress: [████████░░] 80%
 | 1 - Terraform Foundation | 2 | 3 min | 1.5 min |
 | 2 - Hardened Application Stack | 3 | 10 min | 3.3 min |
 | 3 - Backup, Recovery, and Documentation | 3 | 12 min | 4.0 min |
+| 4 - Playwright E2E Testing | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (3 min), 02-01 (4 min), 03-01 (5 min), 03-02 (6 min), 03-03 (1 min)
+- Last 5 plans: 03-03 (1 min), 04-01 (4 min), 04-02 (3 min), 04-03 (6 min), 04-04 (5 min)
 - Trend: Stable
 
 *Updated after each plan completion*
+| Phase 04 P04 | 5min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -91,6 +93,22 @@ Recent decisions affecting current work:
 - [03-02]: Operations doc uses numbered self-contained sections for jump-to-procedure access
 - [03-02]: Enterprise migration covers bind-mount approach (more portable than private registry)
 - [03-03]: Dual methods for lifecycle rule setup: DO Console (GUI) and awscli (CLI) for operator flexibility
+- [04-01]: ES module type with NodeNext module resolution for native ESM compatibility
+- [04-01]: Role-based and text locators preferred over Odoo CSS classes; o_ classes isolated in POMs with version-sensitivity comments
+- [04-01]: Form-based stage changes instead of kanban drag-and-drop for CRM/Project reliability
+- [04-01]: testUserPage fixture skips gracefully when credentials not set
+- [04-02]: Smoke tests self-contained (no auth fixture); module checks use adminPage from auth fixture
+- [04-02]: Workflow tests skip on production via PROD_ODOO_URL env var comparison in beforeEach
+- [04-02]: Serial execution (test.describe.serial) for workflow tests with dependent test state
+- [04-02]: Date.now() suffix for unique test data names to prevent collisions across runs
+- [04-03]: Idempotent setup tests: check if module/user exists before creating
+- [04-03]: HTTP header tests skip on localhost via isLocalhost() helper (no Nginx/SSL locally)
+- [04-03]: infra-audit.sh uses SSH BatchMode with configurable host/port/user
+- [04-03]: setup:local script chains docker compose up, setup tests, and UAT handoff message
+- [04-04]: Direct URL navigation for Odoo 19 app routing (/odoo/crm, /odoo/project) instead of menu clicks
+- [04-04]: JS injection via page.evaluate() to dismiss notification banners reliably
+- [04-04]: Dropdown button pattern for project task stage transitions (Odoo 19 change from status bar)
+- [04-04]: PG 18 volume mount to /var/lib/postgresql/data/pgdata subdirectory (not root data dir)
 
 ### Pending Todos
 
@@ -105,5 +123,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 03-03-PLAN.md (Spaces Lifecycle Rule Documentation) -- Phase 3 fully complete (gap closure done)
+Stopped at: Completed 04-04-PLAN.md (Local stack verification and human checkpoint) -- Phase 4 complete
 Resume file: None

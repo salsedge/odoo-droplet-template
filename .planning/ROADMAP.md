@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Terraform Foundation and Compute** - Provision all DigitalOcean infrastructure (VPC, firewall, droplet, volume, Spaces) via Terraform with secure remote state (completed 2026-02-21)
 - [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
 - [x] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures (completed 2026-03-18)
-- [ ] **Phase 4: Playwright E2E Testing and Odoo Verification** - Automated browser tests for post-deploy verification, backup restore validation, user management, and configuration auditing
+- [x] **Phase 4: Playwright E2E Testing and Odoo Verification** - Automated browser tests for post-deploy verification, backup restore validation, user management, and configuration auditing (completed 2026-03-18)
 - [ ] **Phase 5: Deployment Verification and User Setup** - Use Playwright test suite to create user accounts and verify all system components end-to-end with real users
 - [ ] **Phase 6: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
 
@@ -72,12 +72,24 @@ Plans:
 - [x] 03-03-PLAN.md -- Gap closure: Add DO Spaces 30-day lifecycle rule instructions to deployment runbook and operations doc (Wave 1, gap_closure)
 
 ### Phase 4: Playwright E2E Testing and Odoo Verification
-**Goal**: [To be planned]
+**Goal**: OdooKit -- a Playwright-based Odoo automation and verification toolkit -- is built, tested, and verified against a local Docker Compose staging stack, providing smoke tests, CRM/Project workflow tests, setup automation, configuration auditing, and infrastructure verification
 **Depends on**: Phase 3
-**Plans**: 0 plans
+**Requirements**: Cross-cutting verification of Phases 1-3 (HARD-01, HARD-02, HARD-03, HARD-05, HARD-07, DOCK-02, DOCK-03, DOCK-05, DOCK-06, ODOO-01, ODOO-02, ODOO-03, ODOO-05, PG-01, PG-04, PROXY-03, PROXY-04)
+**Success Criteria** (what must be TRUE):
+  1. OdooKit Playwright project compiles and runs against a local Docker Compose staging stack (Odoo 19 + PostgreSQL 18)
+  2. Smoke tests verify login, health endpoint, and CRM + Project module installation
+  3. Workflow tests complete the full CRM lead lifecycle (create -> advance -> won/lost) and project task management flow (create -> add tasks -> assign -> status)
+  4. Setup automation installs modules, creates throwaway test users, and configures system settings via Odoo UI
+  5. Audit tests verify Odoo configuration (database manager disabled, modules installed) and HTTP security headers (HSTS, X-Content-Type-Options, CSP)
+  6. Infrastructure audit script verifies SSH hardening, fail2ban, UFW, Docker settings, and auditd over SSH
+  7. UAT handoff mode starts local stack, runs setup, and prints clear instructions for human testing
+**Plans**: 4 plans (3 waves)
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 4 to break down)
+- [x] 04-01-PLAN.md -- OdooKit scaffold, Docker Compose, helpers, Page Object Models, auth fixtures (Wave 1)
+- [x] 04-02-PLAN.md -- Smoke tests (login, health, modules) and workflow tests (CRM lead, project task) (Wave 2, depends: 04-01)
+- [x] 04-03-PLAN.md -- Setup automation, audit tests (UI + headers), infrastructure audit script, UAT handoff (Wave 2, depends: 04-01)
+- [x] 04-04-PLAN.md -- Local stack verification and human checkpoint (Wave 3, depends: 04-02, 04-03)
 
 ### Phase 5: Deployment Verification and User Setup
 **Goal**: An admin and a regular user are set up in Odoo using Playwright tests from Phase 4, and the production system is verified end-to-end -- login, CRM workflow, Project workflow, SSL, and backups all function correctly with real user accounts
@@ -118,6 +130,6 @@ Note: Phase 6 (Monitoring) is blocked on external Icinga2 master availability.
 | 1. Terraform Foundation and Compute | 2/2 | Complete    | 2026-02-21 |
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
 | 3. Backup, Recovery, and Documentation | 3/3 | Complete    | 2026-03-18 |
-| 4. Playwright E2E Testing and Odoo Verification | 0/0 | Not started | - |
+| 4. Playwright E2E Testing and Odoo Verification | 4/4 | Complete    | 2026-03-18 |
 | 5. Deployment Verification and User Setup | 0/1 | Not started | - |
 | 6. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
