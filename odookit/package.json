@@ -13,7 +13,9 @@
     "audit:infra": "bash scripts/infra-audit.sh",
     "audit:ui": "npx playwright test --project=production tests/audit/odoo-ui-audit.spec.ts",
     "audit:headers": "npx playwright test --project=production tests/audit/http-headers.spec.ts",
-    "audit:all": "npm run audit:ui && npm run audit:headers && npm run audit:infra"
+    "audit:all": "npm run audit:ui && npm run audit:headers && npm run audit:infra",
+    "verify:prod": "bash scripts/run-production.sh",
+    "verify:backup": "bash scripts/verify-backup.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.58",
