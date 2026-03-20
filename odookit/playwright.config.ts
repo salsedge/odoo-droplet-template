@@ -27,7 +27,7 @@ export default defineConfig({
         baseURL: process.env.LOCAL_ODOO_URL || 'http://localhost:8069',
         ...devices['Desktop Chrome'],
       },
-      testIgnore: [],
+      testIgnore: ['**/production/**'],
     },
     {
       name: 'production',
