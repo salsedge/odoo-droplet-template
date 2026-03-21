@@ -87,10 +87,12 @@ test.describe('Odoo UI audit', () => {
     const companyName = await nameTarget.inputValue();
 
     expect(companyName.length).toBeGreaterThan(0);
-    // Warn (but still pass) if using Odoo default — real audit would flag this
-    if (companyName === 'My Company' || companyName === 'My Company (San Francisco)') {
-      // eslint-disable-next-line no-console
-      console.warn(`AUDIT NOTE: Company name is still the default: "${companyName}". Consider customizing.`);
+    if (!isLocal) {
+      // Production: company name should be customized from the Odoo default
+      expect(
+        companyName !== 'My Company' && companyName !== 'My Company (San Francisco)',
+        `Company name is still the default: "${companyName}". Customize in Settings > Companies.`
+      ).toBe(true);
     }
   });
 });
