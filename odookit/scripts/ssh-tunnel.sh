@@ -45,12 +45,13 @@ case "$ACTION" in
     sleep 1
 
     # Open tunnel: remote 443 -> local $LOCAL_PORT
-    ssh -f -N -L "${LOCAL_PORT}:localhost:443" \
+    # Bind to 127.0.0.1 explicitly — avoids IPv6 resolution issues on macOS
+    ssh -f -N -L "127.0.0.1:${LOCAL_PORT}:localhost:443" \
       -p "${REMOTE_PORT}" ${SSH_OPTS} \
       "${REMOTE_USER}@${REMOTE_HOST}"
 
     echo "SSH tunnel open: localhost:${LOCAL_PORT} -> ${REMOTE_HOST}:443"
-    echo "Playwright baseURL: https://localhost:${LOCAL_PORT}"
+    echo "Playwright baseURL: https://127.0.0.1:${LOCAL_PORT}"
     ;;
 
   stop)

@@ -99,6 +99,11 @@ run-nginx: ## Run 04-setup-nginx.sh on droplet (requires DOMAIN and CERT_EMAIL)
 	@[ -n "$(CERT_EMAIL)" ] || { echo "ERROR: CERT_EMAIL not set"; exit 1; }
 	$(SSH_CMD) "sudo bash $(REMOTE_DIR)/scripts/04-setup-nginx.sh $(DOMAIN) $(CERT_EMAIL)"
 
+.PHONY: run-backups
+run-backups: upload ## Upload files and run 05-setup-backups.sh on droplet
+	@[ -n "$(DROPLET_IP)" ] || { echo "ERROR: DROPLET_IP not set"; exit 1; }
+	$(SSH_CMD) "sudo bash $(REMOTE_DIR)/scripts/05-setup-backups.sh"
+
 # ---------------------------------------------------------------------------
 # Full deployment sequences
 # ---------------------------------------------------------------------------
@@ -142,6 +147,22 @@ logs-postgres: ## Tail PostgreSQL container logs
 .PHONY: logs-nginx
 logs-nginx: ## Tail Nginx access and error logs
 	$(SSH_CMD) "sudo tail -f /var/log/nginx/odoo-access.log /var/log/nginx/odoo-error.log"
+
+# ---------------------------------------------------------------------------
+# OdooKit — test and verification
+# ---------------------------------------------------------------------------
+
+.PHONY: verify-prod
+verify-prod: ## Run full production verification (tunnel, smoke, audit, users, backup)
+	cd odookit && npm run verify:prod
+
+.PHONY: verify-backup
+verify-backup: ## Run backup verification only
+	cd odookit && npm run verify:backup
+
+.PHONY: test-local
+test-local: ## Run OdooKit tests against local Docker Compose stack
+	cd odookit && npm run test:local
 
 # ---------------------------------------------------------------------------
 # Local validation

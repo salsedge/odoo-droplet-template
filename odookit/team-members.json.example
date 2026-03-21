@@ -20,28 +20,28 @@
   "users": [
     {
       "name": "Admin User",
-      "login": "admin@company.com",
+      "login": "admin@example.com",
       "role": "admin",
       "note": "Admin password is set during Odoo initial setup, not managed here"
     },
     {
-      "name": "Sarah Johnson",
-      "login": "sarah@company.com",
+      "name": "Jane Smith",
+      "login": "jane@example.com",
       "password": "CHANGE_ME_unique_password_1",
       "role": "user",
       "groups": {
-        "Sales": "User: Own Documents Only",
-        "Project": "User"
+        "Sales": "User: All Documents",
+        "Project": "Administrator"
       }
     },
     {
-      "name": "Mike Chen",
-      "login": "mike@company.com",
+      "name": "John Doe",
+      "login": "john@example.com",
       "password": "CHANGE_ME_unique_password_2",
       "role": "user",
       "groups": {
-        "Sales": "User: Own Documents Only",
-        "Project": "User"
+        "Sales": "User: All Documents",
+        "Project": "Administrator"
       }
     }
   ]

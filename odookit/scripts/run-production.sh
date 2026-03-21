@@ -92,7 +92,7 @@ trap 'bash "${SCRIPT_DIR}/ssh-tunnel.sh" stop 2>/dev/null' EXIT
 # --- Environment for Playwright ---
 
 LOCAL_PORT="${TUNNEL_LOCAL_PORT:-8443}"
-export PROD_ODOO_URL="https://localhost:${LOCAL_PORT}"
+export PROD_ODOO_URL="https://127.0.0.1:${LOCAL_PORT}"
 export REPORT=1
 
 # =============================================================================
