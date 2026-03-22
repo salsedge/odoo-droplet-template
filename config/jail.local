@@ -17,9 +17,9 @@ filter   = sshd
 maxretry = 5
 bantime  = 600
 
-# Odoo login failure jail -- activates once Odoo logs exist.
+# Odoo login failure jail.
 # Uses 'auto' backend to poll the log file (not systemd journal).
-# fail2ban gracefully handles missing log files (no errors until file appears).
+# NOTE: The log file must exist before fail2ban starts — create it in the deploy script.
 [odoo-login]
 enabled  = true
 port     = http,https

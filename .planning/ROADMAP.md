@@ -100,10 +100,12 @@ Plans:
   2. A regular user with restricted permissions can log in, create a CRM lead, advance it through pipeline stages, and create and manage a Project with tasks -- without access to admin settings
   3. Both users access Odoo exclusively over HTTPS with a valid SSL certificate, HTTP requests redirect to HTTPS, and the browser shows no certificate warnings
   4. A backup runs successfully, the backup file appears in both local storage and DO Spaces, and the backup restoration procedure is confirmed functional with the live database
-**Plans**: TBD
+**Plans**: 3 plans (3 waves)
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md -- Production targeting infrastructure: SSH tunnel, backup verification, team members config, Playwright config updates (Wave 1)
+- [ ] 05-02-PLAN.md -- Production user creation test and orchestration script with fail-fast safety gates (Wave 2, depends: 05-01)
+- [ ] 05-03-PLAN.md -- Two-stage execution: local dry run + production verification human checkpoint (Wave 3, depends: 05-02)
 
 ### Phase 6: Monitoring
 **Goal**: The Odoo host reports health status to the existing Icinga2 master -- container failures, PostgreSQL issues, and system resource exhaustion trigger alerts without manual log inspection
@@ -131,5 +133,5 @@ Note: Phase 6 (Monitoring) is blocked on external Icinga2 master availability.
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
 | 3. Backup, Recovery, and Documentation | 3/3 | Complete    | 2026-03-18 |
 | 4. Playwright E2E Testing and Odoo Verification | 4/4 | Complete    | 2026-03-18 |
-| 5. Deployment Verification and User Setup | 0/1 | Not started | - |
+| 5. Deployment Verification and User Setup | 0/3 | Not started | - |
 | 6. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |

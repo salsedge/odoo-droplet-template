@@ -27,12 +27,15 @@ export default defineConfig({
         baseURL: process.env.LOCAL_ODOO_URL || 'http://localhost:8069',
         ...devices['Desktop Chrome'],
       },
-      testIgnore: [],
+      testIgnore: ['**/production/**'],
     },
     {
       name: 'production',
+      timeout: 90_000,
+      expect: { timeout: 15_000 },
       use: {
         baseURL: process.env.PROD_ODOO_URL,
+        ignoreHTTPSErrors: true,  // Required: SSH tunnel cert is for domain, not localhost
         ...devices['Desktop Chrome'],
       },
       testIgnore: ['**/setup/**'],

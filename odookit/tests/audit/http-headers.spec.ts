@@ -14,6 +14,9 @@ import { test, expect } from '@playwright/test';
 const isLocalhost = (url: string | undefined): boolean =>
   !url || url.startsWith('http://localhost') || url.startsWith('http://127.0.0.1');
 
+const isTunnel = (url: string | undefined): boolean =>
+  !!url && (url.includes('127.0.0.1:') || url.includes('localhost:')) && url.startsWith('https://');
+
 test.describe('HTTP security headers', () => {
   test('HSTS header is present with max-age >= 1 year', async ({ page, baseURL }) => {
     test.skip(isLocalhost(baseURL), 'HSTS requires HTTPS — skipping on localhost');
@@ -89,6 +92,7 @@ test.describe('HTTP security headers', () => {
 
   test('HTTP redirects to HTTPS', async ({ page, baseURL }) => {
     test.skip(isLocalhost(baseURL), 'HTTP→HTTPS redirect requires Nginx — skipping on localhost');
+    test.skip(isTunnel(baseURL), 'HTTP→HTTPS redirect cannot be tested through SSH tunnel — tunnel only forwards port 443');
 
     // Make a request to the HTTP version and verify it redirects
     const httpUrl = baseURL!.replace('https://', 'http://');
