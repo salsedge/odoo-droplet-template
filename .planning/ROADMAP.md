@@ -116,10 +116,11 @@ Plans:
   2. Stopping the Odoo or PostgreSQL container triggers a critical alert on the Icinga2 master within the check interval
   3. System resource checks (CPU, memory, disk, load average) and PostgreSQL-specific checks (connections, database size, query latency) report OK under normal operation and escalate when thresholds are breached
   4. Service definition files are provided and documented so the Icinga2 master admin can integrate them
-**Plans**: TBD
+**Plans**: 2 plans (1 wave)
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md -- Custom check plugins: Docker container health (check_docker_stack) and PostgreSQL metrics (check_postgres_health) (Wave 1)
+- [ ] 06-02-PLAN.md -- Icinga2 service definition templates (commands, services, notifications) and integration README (Wave 1)
 
 ## Progress
 
@@ -134,4 +135,4 @@ Note: Phase 6 (Monitoring) is blocked on external Icinga2 master availability.
 | 3. Backup, Recovery, and Documentation | 3/3 | Complete    | 2026-03-18 |
 | 4. Playwright E2E Testing and Odoo Verification | 4/4 | Complete    | 2026-03-18 |
 | 5. Deployment Verification and User Setup | 0/3 | Not started | - |
-| 6. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
+| 6. Monitoring | 0/2 | Not started (blocked on Icinga2 master) | - |
