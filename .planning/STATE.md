@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Run `terraform apply` and get a fully hardened, monitored Odoo deployment with Nginx/SSL -- reproducible, secure, and production-ready from day one.
-**Current focus:** Phase 5: Deployment Verification and User Setup
+**Current focus:** Phase 6: Monitoring (Complete)
 
 ## Current Position
 
-Phase: 5 of 6 (Deployment Verification and User Setup)
-Plan: 2 of 3 executed in current phase
-Status: Executing Phase 5
-Last activity: 2026-03-19 -- Completed 05-02 (Production user creation and orchestration)
+Phase: 6 of 6 (Monitoring)
+Plan: 2 of 2 executed in current phase
+Status: Phase 6 Complete
+Last activity: 2026-03-22 -- Completed 06-02 (Service definitions and README)
 
-Progress: [████████████] 96%
+Progress: [████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 3.0 min
-- Total execution time: 0.70 hours
+- Total plans completed: 16
+- Average duration: 2.9 min
+- Total execution time: 0.76 hours
 
 **By Phase:**
 
@@ -33,13 +33,15 @@ Progress: [████████████] 96%
 | 4 - Playwright E2E Testing | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (3 min), 04-03 (6 min), 04-04 (5 min), 05-01 (2 min), 05-02 (2 min)
+- Last 5 plans: 04-04 (5 min), 05-01 (2 min), 05-02 (2 min), 06-01 (2 min), 06-02 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
 | Phase 04 P04 | 5min | 2 tasks | 13 files |
 | Phase 05 P01 | 2min | 2 tasks | 6 files |
 | Phase 05 P02 | 2min | 2 tasks | 3 files |
+| Phase 06 P01 | 2min | 2 tasks | 2 files |
+| Phase 06 P02 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -117,6 +119,13 @@ Recent decisions affecting current work:
 - [05-02]: User creation reads from team-members.json config file, not env vars -- supports multiple users with per-user groups
 - [05-02]: Orchestration enforces strict 5-stage order: smoke (fail-fast) -> infra audit -> odoo audit -> user creation -> backup verify
 - [05-02]: Non-smoke stage failures warn but continue -- partial user creation keeps successful accounts
+- [06-01]: Bash over Python for check plugins -- minimal dependencies, no interpreter needed on host
+- [06-01]: Worst-status-wins pattern for complete perfdata collection in every invocation
+- [06-01]: bc fallback to integer comparison for cache hit ratio on minimal systems without bc
+- [06-02]: Parameterised templates with PLACEHOLDER markers rather than ready-to-drop configs
+- [06-02]: Built-in mail-service-notification command rather than custom notification scripts
+- [06-02]: CustomPluginDir constant in commands.conf for adjustable plugin path
+- [06-02]: Example host object commented out in services.conf for admin reference
 
 ### Pending Todos
 
@@ -130,6 +139,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-19
-Stopped at: Completed 05-02-PLAN.md (Production user creation and orchestration)
+Last session: 2026-03-22
+Stopped at: Completed 06-02-PLAN.md (Service definitions and integration README)
 Resume file: None
