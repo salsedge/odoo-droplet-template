@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# =============================================================================
+# check_docker_stack — Icinga2/Nagios Docker container health check plugin
+# =============================================================================
+# Requirement: MON-02 (Docker container monitoring)
+#
+# Monitors Docker container health for the Odoo production stack.
+# Checks running state, Docker healthcheck status, and restart counts
+# for each specified container.
+#
+# Nagios Plugin API:
+#   Exit 0 = OK, 1 = WARNING, 2 = CRITICAL, 3 = UNKNOWN
+#   Output: single status line, perfdata after '|'
+#
+# Usage:
+#   check_docker_stack [--containers odoo-app,odoo-db] [--warn-restarts 2] [--crit-restarts 5]
+#
+# Examples:
+#   check_docker_stack
+#   check_docker_stack --containers odoo-app,odoo-db --warn-restarts 3 --crit-restarts 10
+# =============================================================================
+set -uo pipefail
+
+# --- Nagios exit codes -------------------------------------------------------
+readonly STATE_OK=0
+readonly STATE_WARNING=1
+readonly STATE_CRITICAL=2
+readonly STATE_UNKNOWN=3
+
+# --- Defaults ----------------------------------------------------------------
+CONTAINERS="odoo-app,odoo-db"
+WARN_RESTARTS=2
+CRIT_RESTARTS=5
+
+# --- Functions ---------------------------------------------------------------
+
+usage() {
+  cat <<USAGE
+Usage: $(basename "$0") [OPTIONS]
+
+Monitor Docker container health for the Odoo production stack.
+
+Options:
+  --containers NAME,NAME   Comma-separated container names (default: odoo-app,odoo-db)
+  --warn-restarts N        Warning threshold for restart count (default: 2)
+  --crit-restarts N        Critical threshold for restart count (default: 5)
+  --help                   Show this help message
+
+Exit Codes:
+  0  OK       - All containers healthy
+  1  WARNING  - Restart count above warning threshold
+  2  CRITICAL - Container not running, unhealthy, or restarts above critical threshold
+  3  UNKNOWN  - Docker not found or permission denied
+USAGE
+}
+
+# --- Argument parsing --------------------------------------------------------
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --containers)
+      CONTAINERS="$2"
+      shift 2
+      ;;
+    --warn-restarts)
+      WARN_RESTARTS="$2"
+      shift 2
+      ;;
+    --crit-restarts)
+      CRIT_RESTARTS="$2"
+      shift 2
+      ;;
+    --help)
+      usage
+      exit "$STATE_UNKNOWN"
+      ;;
+    *)
+      echo "UNKNOWN - Unrecognized option: $1"
+      exit "$STATE_UNKNOWN"
+      ;;
+  esac
+done
+
+# --- Pre-flight checks -------------------------------------------------------
+
+if ! command -v docker &>/dev/null; then
+  echo "UNKNOWN - docker command not found"
+  exit "$STATE_UNKNOWN"
+fi
+
+# --- Main check logic --------------------------------------------------------
+
+overall_status=$STATE_OK
+status_details=()
+perfdata=()
+critical_messages=()
+warning_messages=()
+
+IFS=',' read -ra container_list <<< "$CONTAINERS"
+
+for container in "${container_list[@]}"; do
+  # Check if container exists and is running
+  running=$(docker inspect --format='{{.State.Running}}' "$container" 2>&1)
+  inspect_rc=$?
+
+  if [[ $inspect_rc -ne 0 ]]; then
+    # docker inspect failed — container not found or permission denied
+    if echo "$running" | grep -qi "permission denied"; then
+      echo "UNKNOWN - Permission denied accessing Docker. Add the nagios user to the docker group: usermod -aG docker nagios"
+      exit "$STATE_UNKNOWN"
+    fi
+    critical_messages+=("Container $container not found")
+    overall_status=$STATE_CRITICAL
+    # No perfdata for missing containers — skip to next
+    continue
+  fi
+
+  if [[ "$running" != "true" ]]; then
+    critical_messages+=("Container $container is not running")
+    overall_status=$STATE_CRITICAL
+    perfdata+=("'${container}_restarts'=0;${WARN_RESTARTS};${CRIT_RESTARTS};0;")
+    continue
+  fi
+
+  # Check Docker healthcheck status
+  health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$container" 2>/dev/null)
+
+  if [[ "$health_status" == "unhealthy" ]]; then
+    critical_messages+=("Container $container is unhealthy")
+    overall_status=$STATE_CRITICAL
+  fi
+
+  # Check restart count
+  restart_count=$(docker inspect --format='{{.RestartCount}}' "$container" 2>/dev/null)
+  restart_count=${restart_count:-0}
+
+  if [[ "$restart_count" -ge "$CRIT_RESTARTS" ]]; then
+    critical_messages+=("$container restart count $restart_count")
+    overall_status=$STATE_CRITICAL
+  elif [[ "$restart_count" -ge "$WARN_RESTARTS" ]]; then
+    warning_messages+=("$container restart count $restart_count")
+    if [[ $overall_status -lt $STATE_WARNING ]]; then
+      overall_status=$STATE_WARNING
+    fi
+  fi
+
+  # Build per-container status detail
+  if [[ "$health_status" == "no-healthcheck" ]]; then
+    status_details+=("$container: running/$restart_count")
+  else
+    status_details+=("$container: $health_status/$restart_count")
+  fi
+
+  # Build perfdata
+  perfdata+=("'${container}_restarts'=${restart_count};${WARN_RESTARTS};${CRIT_RESTARTS};0;")
+done
+
+# --- Output ------------------------------------------------------------------
+
+perfdata_str=""
+if [[ ${#perfdata[@]} -gt 0 ]]; then
+  perfdata_str=" | $(IFS=' '; echo "${perfdata[*]}")"
+fi
+
+case $overall_status in
+  "$STATE_CRITICAL")
+    message="${critical_messages[*]}"
+    if [[ ${#warning_messages[@]} -gt 0 ]]; then
+      message="$message; ${warning_messages[*]}"
+    fi
+    echo "CRITICAL - ${message}${perfdata_str}"
+    ;;
+  "$STATE_WARNING")
+    echo "WARNING - ${warning_messages[*]}${perfdata_str}"
+    ;;
+  "$STATE_OK")
+    details=$(IFS=', '; echo "${status_details[*]}")
+    echo "OK - All containers healthy (${details})${perfdata_str}"
+    ;;
+esac
+
+exit "$overall_status"
