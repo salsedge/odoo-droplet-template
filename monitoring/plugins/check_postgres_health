@@ -1,0 +1,320 @@
+#!/usr/bin/env bash
+# =============================================================================
+# check_postgres_health — Icinga2/Nagios PostgreSQL metrics check plugin
+# =============================================================================
+# Requirement: MON-03 (PostgreSQL monitoring)
+#
+# Monitors PostgreSQL health metrics via docker exec into the odoo-db container.
+# Collects: active connections, database size, query latency, cache hit ratio.
+#
+# Nagios Plugin API:
+#   Exit 0 = OK, 1 = WARNING, 2 = CRITICAL, 3 = UNKNOWN
+#   Output: single status line, perfdata after '|'
+#
+# Note: Query latency includes docker exec overhead (~20-50ms). Thresholds
+# account for this — a 100ms warning threshold is appropriate for the
+# combined docker exec + query round-trip.
+#
+# Usage:
+#   check_postgres_health [--container odoo-db] [--pg-user odoo] [--pg-db odoo]
+#
+# Examples:
+#   check_postgres_health
+#   check_postgres_health --container odoo-db --warn-conn 30 --crit-conn 40
+#   check_postgres_health --warn-cache 95 --crit-cache 85
+# =============================================================================
+set -uo pipefail
+
+# --- Nagios exit codes -------------------------------------------------------
+readonly STATE_OK=0
+readonly STATE_WARNING=1
+readonly STATE_CRITICAL=2
+readonly STATE_UNKNOWN=3
+
+# --- Defaults ----------------------------------------------------------------
+CONTAINER="odoo-db"
+PG_USER="${PG_USER:-odoo}"
+PG_DB="${PG_DB:-odoo}"
+
+# Connection thresholds (of max_connections=50)
+WARN_CONN=35
+CRIT_CONN=45
+
+# Database size thresholds (bytes)
+WARN_SIZE=5368709120    # 5 GB
+CRIT_SIZE=10737418240   # 10 GB
+
+# Query latency thresholds (ms, includes docker exec overhead)
+WARN_LATENCY=100
+CRIT_LATENCY=500
+
+# Cache hit ratio thresholds (%, lower is worse)
+WARN_CACHE=90
+CRIT_CACHE=80
+
+# --- Functions ---------------------------------------------------------------
+
+usage() {
+  cat <<USAGE
+Usage: $(basename "$0") [OPTIONS]
+
+Monitor PostgreSQL health metrics via docker exec into the database container.
+
+Options:
+  --container NAME      Docker container name (default: odoo-db)
+  --pg-user USER        PostgreSQL user (default: odoo, or PG_USER env var)
+  --pg-db DATABASE      PostgreSQL database (default: odoo, or PG_DB env var)
+  --warn-conn N         Warning threshold for active connections (default: 35)
+  --crit-conn N         Critical threshold for active connections (default: 45)
+  --warn-size BYTES     Warning threshold for database size (default: 5368709120 / 5GB)
+  --crit-size BYTES     Critical threshold for database size (default: 10737418240 / 10GB)
+  --warn-latency MS     Warning threshold for query latency in ms (default: 100)
+  --crit-latency MS     Critical threshold for query latency in ms (default: 500)
+  --warn-cache PCT      Warning threshold for cache hit ratio % (default: 90)
+  --crit-cache PCT      Critical threshold for cache hit ratio % (default: 80)
+  --help                Show this help message
+
+Metrics Collected:
+  connections      Active connections from pg_stat_activity
+  db_size          Database size in bytes from pg_database_size()
+  query_latency    Round-trip time for SELECT 1 (includes docker exec overhead)
+  cache_hit_ratio  Buffer cache hit percentage from pg_stat_database
+
+Exit Codes:
+  0  OK       - All metrics within normal range
+  1  WARNING  - One or more metrics above warning threshold
+  2  CRITICAL - One or more metrics above critical threshold
+  3  UNKNOWN  - Docker not found, container not running, or query failure
+USAGE
+}
+
+pg_query() {
+  docker exec -i "$CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -t -A -c "$1" 2>/dev/null
+}
+
+# Convert bytes to human-readable (MB or GB)
+human_size() {
+  local bytes=$1
+  if [[ $bytes -ge 1073741824 ]]; then
+    echo "$(( bytes / 1073741824 ))GB"
+  else
+    echo "$(( bytes / 1048576 ))MB"
+  fi
+}
+
+# Update overall status (worst wins)
+update_status() {
+  local new_status=$1
+  if [[ $new_status -gt $overall_status ]]; then
+    overall_status=$new_status
+  fi
+}
+
+# --- Argument parsing --------------------------------------------------------
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --container)
+      CONTAINER="$2"
+      shift 2
+      ;;
+    --pg-user)
+      PG_USER="$2"
+      shift 2
+      ;;
+    --pg-db)
+      PG_DB="$2"
+      shift 2
+      ;;
+    --warn-conn)
+      WARN_CONN="$2"
+      shift 2
+      ;;
+    --crit-conn)
+      CRIT_CONN="$2"
+      shift 2
+      ;;
+    --warn-size)
+      WARN_SIZE="$2"
+      shift 2
+      ;;
+    --crit-size)
+      CRIT_SIZE="$2"
+      shift 2
+      ;;
+    --warn-latency)
+      WARN_LATENCY="$2"
+      shift 2
+      ;;
+    --crit-latency)
+      CRIT_LATENCY="$2"
+      shift 2
+      ;;
+    --warn-cache)
+      WARN_CACHE="$2"
+      shift 2
+      ;;
+    --crit-cache)
+      CRIT_CACHE="$2"
+      shift 2
+      ;;
+    --help)
+      usage
+      exit "$STATE_UNKNOWN"
+      ;;
+    *)
+      echo "UNKNOWN - Unrecognized option: $1"
+      exit "$STATE_UNKNOWN"
+      ;;
+  esac
+done
+
+# --- Pre-flight checks -------------------------------------------------------
+
+if ! command -v docker &>/dev/null; then
+  echo "UNKNOWN - docker command not found"
+  exit "$STATE_UNKNOWN"
+fi
+
+# Verify container is running
+container_running=$(docker inspect --format='{{.State.Running}}' "$CONTAINER" 2>&1)
+inspect_rc=$?
+
+if [[ $inspect_rc -ne 0 ]]; then
+  if echo "$container_running" | grep -qi "permission denied"; then
+    echo "UNKNOWN - Permission denied accessing Docker. Add the nagios user to the docker group: usermod -aG docker nagios"
+    exit "$STATE_UNKNOWN"
+  fi
+  echo "UNKNOWN - Container $CONTAINER not found"
+  exit "$STATE_UNKNOWN"
+fi
+
+if [[ "$container_running" != "true" ]]; then
+  echo "UNKNOWN - Container $CONTAINER is not running"
+  exit "$STATE_UNKNOWN"
+fi
+
+# --- Collect metrics ---------------------------------------------------------
+
+overall_status=$STATE_OK
+issues=()
+perfdata=()
+metric_conn=""
+metric_size=""
+metric_latency=""
+metric_cache=""
+
+# 1. Active connections
+conn_result=$(pg_query "SELECT count(*) FROM pg_stat_activity;")
+if [[ -n "$conn_result" && "$conn_result" =~ ^[0-9]+$ ]]; then
+  metric_conn=$conn_result
+  if [[ $metric_conn -ge $CRIT_CONN ]]; then
+    issues+=("Connections ${metric_conn}/50")
+    update_status "$STATE_CRITICAL"
+  elif [[ $metric_conn -ge $WARN_CONN ]]; then
+    issues+=("Connections ${metric_conn}/50")
+    update_status "$STATE_WARNING"
+  fi
+  perfdata+=("'connections'=${metric_conn};${WARN_CONN};${CRIT_CONN};0;50")
+else
+  issues+=("connections query failed")
+  perfdata+=("'connections'=U;${WARN_CONN};${CRIT_CONN};0;50")
+fi
+
+# 2. Database size (bytes)
+size_result=$(pg_query "SELECT pg_database_size(current_database());")
+if [[ -n "$size_result" && "$size_result" =~ ^[0-9]+$ ]]; then
+  metric_size=$size_result
+  human=$(human_size "$metric_size")
+  if [[ $metric_size -ge $CRIT_SIZE ]]; then
+    issues+=("DB size ${human}")
+    update_status "$STATE_CRITICAL"
+  elif [[ $metric_size -ge $WARN_SIZE ]]; then
+    issues+=("DB size ${human}")
+    update_status "$STATE_WARNING"
+  fi
+  perfdata+=("'db_size'=${metric_size}B;${WARN_SIZE};${CRIT_SIZE};0;")
+else
+  issues+=("db_size query failed")
+  perfdata+=("'db_size'=UB;${WARN_SIZE};${CRIT_SIZE};0;")
+fi
+
+# 3. Query latency (ms) — measures round-trip including docker exec overhead
+start_ns=$(date +%s%N)
+pg_query "SELECT 1;" >/dev/null
+query_rc=$?
+end_ns=$(date +%s%N)
+
+if [[ $query_rc -eq 0 ]]; then
+  metric_latency=$(( (end_ns - start_ns) / 1000000 ))
+  if [[ $metric_latency -ge $CRIT_LATENCY ]]; then
+    issues+=("Latency ${metric_latency}ms")
+    update_status "$STATE_CRITICAL"
+  elif [[ $metric_latency -ge $WARN_LATENCY ]]; then
+    issues+=("Latency ${metric_latency}ms")
+    update_status "$STATE_WARNING"
+  fi
+  perfdata+=("'query_latency'=${metric_latency}ms;${WARN_LATENCY};${CRIT_LATENCY};0;")
+else
+  issues+=("latency query failed")
+  perfdata+=("'query_latency'=Ums;${WARN_LATENCY};${CRIT_LATENCY};0;")
+fi
+
+# 4. Cache hit ratio (%) — lower is worse
+cache_result=$(pg_query "SELECT ROUND(100.0 * sum(blks_hit) / (sum(blks_hit) + sum(blks_read) + 1), 2) FROM pg_stat_database WHERE datname = current_database();")
+if [[ -n "$cache_result" && "$cache_result" =~ ^[0-9.]+$ ]]; then
+  metric_cache=$cache_result
+  # Cache hit: lower is worse (inverted threshold comparison)
+  # Use bc for floating-point comparison
+  if command -v bc &>/dev/null; then
+    if (( $(echo "$metric_cache < $CRIT_CACHE" | bc -l) )); then
+      issues+=("Cache hit ${metric_cache}%")
+      update_status "$STATE_CRITICAL"
+    elif (( $(echo "$metric_cache < $WARN_CACHE" | bc -l) )); then
+      issues+=("Cache hit ${metric_cache}%")
+      update_status "$STATE_WARNING"
+    fi
+  else
+    # Fallback: truncate to integer for comparison if bc unavailable
+    cache_int=${metric_cache%.*}
+    cache_int=${cache_int:-0}
+    if [[ $cache_int -lt $CRIT_CACHE ]]; then
+      issues+=("Cache hit ${metric_cache}%")
+      update_status "$STATE_CRITICAL"
+    elif [[ $cache_int -lt $WARN_CACHE ]]; then
+      issues+=("Cache hit ${metric_cache}%")
+      update_status "$STATE_WARNING"
+    fi
+  fi
+  perfdata+=("'cache_hit_ratio'=${metric_cache}%;${WARN_CACHE};${CRIT_CACHE};0;100")
+else
+  issues+=("cache_hit query failed")
+  perfdata+=("'cache_hit_ratio'=U%;${WARN_CACHE};${CRIT_CACHE};0;100")
+fi
+
+# --- Output ------------------------------------------------------------------
+
+perfdata_str=""
+if [[ ${#perfdata[@]} -gt 0 ]]; then
+  perfdata_str=" | $(IFS=' '; echo "${perfdata[*]}")"
+fi
+
+# Build human-readable size for OK message
+size_human=""
+if [[ -n "$metric_size" ]]; then
+  size_human=$(human_size "$metric_size")
+fi
+
+case $overall_status in
+  "$STATE_CRITICAL")
+    echo "CRITICAL - $(IFS=', '; echo "${issues[*]}")${perfdata_str}"
+    ;;
+  "$STATE_WARNING")
+    echo "WARNING - $(IFS=', '; echo "${issues[*]}")${perfdata_str}"
+    ;;
+  "$STATE_OK")
+    echo "OK - PG healthy (conn:${metric_conn:-?}, size:${size_human:-?}, latency:${metric_latency:-?}ms, cache:${metric_cache:-?}%)${perfdata_str}"
+    ;;
+esac
+
+exit "$overall_status"
