@@ -78,3 +78,4 @@ Dual Docker networks isolate traffic: `frontend` (Nginx ↔ Odoo) and `backend` 
 | [Enterprise Migration](enterprise-migration.md) | Infrastructure operators | Community → Enterprise upgrade path |
 | [Requirements](reference/requirements.md) | Project stakeholders | All 48 v1 requirements with traceability |
 | [Key Decisions](reference/decisions.md) | All team members | Architectural decisions and rationale |
+| [Portal Domain Setup](portal-domain-setup.md) | Infrastructure operators | Add portal.loodon.com as primary domain |
