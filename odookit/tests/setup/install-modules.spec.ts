@@ -59,13 +59,50 @@ test.describe('Module installation', () => {
     expect(isInstalled).toBe(true);
   });
 
-  test('verify both modules appear in app menu', async ({ adminPage }) => {
+  test('install Sales module', async ({ adminPage }) => {
+    test.slow();
+
+    const settings = new SettingsPage(adminPage);
+
+    const alreadyInstalled = await settings.isModuleInstalled('Sales');
+    if (alreadyInstalled) {
+      // eslint-disable-next-line no-console
+      console.log('Sales module already installed — skipping installation');
+      return;
+    }
+
+    await settings.installModule('Sales');
+    await adminPage.waitForTimeout(5000);
+
+    const isInstalled = await settings.isModuleInstalled('Sales');
+    expect(isInstalled).toBe(true);
+  });
+
+  test('install Invoicing module', async ({ adminPage }) => {
+    test.slow();
+
+    const settings = new SettingsPage(adminPage);
+
+    const alreadyInstalled = await settings.isModuleInstalled('Invoicing');
+    if (alreadyInstalled) {
+      // eslint-disable-next-line no-console
+      console.log('Invoicing module already installed — skipping installation');
+      return;
+    }
+
+    await settings.installModule('Invoicing');
+    await adminPage.waitForTimeout(5000);
+
+    const isInstalled = await settings.isModuleInstalled('Invoicing');
+    expect(isInstalled).toBe(true);
+  });
+
+  test('verify all modules appear in app menu', async ({ adminPage }) => {
     const appMenu = new AppMenuPage(adminPage);
 
-    const crmInstalled = await appMenu.isAppInstalled('CRM');
-    const projectInstalled = await appMenu.isAppInstalled('Project');
-
-    expect(crmInstalled).toBe(true);
-    expect(projectInstalled).toBe(true);
+    for (const app of ['CRM', 'Sales', 'Project', 'Invoicing']) {
+      const installed = await appMenu.isAppInstalled(app);
+      expect(installed, `${app} should appear in app menu`).toBe(true);
+    }
   });
 });
