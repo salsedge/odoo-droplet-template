@@ -70,11 +70,17 @@ test.describe('Production team user creation', () => {
 
         const userMgmt = new UserManagementPage(adminPage);
 
-        // Idempotent: skip if user already exists
+        // Idempotent: if user exists, sync groups instead of creating
         const exists = await userMgmt.userExists(user.login);
         if (exists) {
-          // eslint-disable-next-line no-console
-          console.log(`User ${user.login} already exists — skipping creation`);
+          if (user.groups && Object.keys(user.groups).length > 0) {
+            // eslint-disable-next-line no-console
+            console.log(`User ${user.login} already exists — syncing groups`);
+            await userMgmt.updateUserGroups(user.login, user.groups);
+          } else {
+            // eslint-disable-next-line no-console
+            console.log(`User ${user.login} already exists — no groups to sync`);
+          }
           return;
         }
 

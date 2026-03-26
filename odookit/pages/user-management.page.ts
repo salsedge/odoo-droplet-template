@@ -62,33 +62,8 @@ export class UserManagementPage {
     await this.page.waitForTimeout(500);
 
     // Handle group assignments if specified
-    // Odoo 19 uses dropdown textbox fields for role groups (e.g., Sales: "No" -> "User: Own Documents Only")
-    // Groups format: { fieldLabel: optionText } e.g., { "Sales": "User: Own Documents Only", "Project": "User" }
     if (options?.groups) {
-      for (const [fieldLabel, optionText] of Object.entries(options.groups)) {
-        // Find the dropdown for this field (e.g., the "Sales?" textbox)
-        const dropdown = this.page.getByRole('textbox', { name: new RegExp(fieldLabel, 'i') });
-        if (await dropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await dropdown.click();
-          await this.page.waitForTimeout(300);
-
-          // Clear existing value and type the option
-          await dropdown.fill('');
-          await this.page.waitForTimeout(200);
-          await dropdown.fill(optionText);
-          await this.page.waitForTimeout(500);
-
-          // Select from the autocomplete dropdown
-          const autocompleteOption = this.page.locator('.o-autocomplete--dropdown-item, .o_m2o_dropdown_option, .ui-menu-item').filter({ hasText: optionText }).first();
-          if (await autocompleteOption.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await autocompleteOption.click();
-          } else {
-            // Try pressing Enter to select the first match
-            await dropdown.press('Enter');
-          }
-          await this.page.waitForTimeout(300);
-        }
-      }
+      await this._setGroups(options.groups);
     }
 
     // Save the user form via the save button
@@ -137,6 +112,82 @@ export class UserManagementPage {
     const changeBtn = dialog.getByRole('button', { name: 'Change Password' });
     await changeBtn.click();
     await this.page.waitForTimeout(1000);
+  }
+
+  /**
+   * Update group assignments for an existing user.
+   * Opens the user form by login, sets groups to match the provided config, and saves.
+   * Idempotent — safe to call with the same groups repeatedly.
+   *
+   * @param login - Email/login of the existing user
+   * @param groups - Group assignments e.g. { "Sales": "Administrator", "Invoicing": "Billing Administrator" }
+   */
+  async updateUserGroups(login: string, groups: Record<string, string>): Promise<void> {
+    await this.openUsers();
+
+    // Search for the user
+    const searchInput = this.page.locator('.o_searchview_input');
+    await searchInput.fill(login);
+    await searchInput.press('Enter');
+    await this.page.waitForTimeout(2000);
+
+    // Click into the user form
+    const userRow = this.page.locator('.o_data_row', { hasText: login });
+    if (!(await userRow.isVisible({ timeout: 3000 }).catch(() => false))) {
+      throw new Error(`User ${login} not found — cannot update groups`);
+    }
+    await userRow.click();
+    await this.page.locator('.o_form_view').waitFor({ state: 'visible', timeout: 10000 });
+
+    // Set groups
+    await this._setGroups(groups);
+
+    // Save
+    const saveManually = this.page.getByRole('button', { name: 'Save manually' });
+    const saveButton = this.page.locator('.o_form_button_save');
+    const saveTarget = await saveManually.isVisible({ timeout: 2000 }).catch(() => false)
+      ? saveManually
+      : saveButton;
+
+    if (await saveTarget.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await saveTarget.click();
+    }
+    await this.page.waitForTimeout(2000);
+  }
+
+  /**
+   * Set group dropdown values on the currently open user form.
+   * Reused by both createUser and updateUserGroups.
+   *
+   * Odoo 19 uses dropdown textbox fields for role groups
+   * (e.g., Sales: "No" -> "User: Own Documents Only")
+   * Groups format: { fieldLabel: optionText }
+   */
+  private async _setGroups(groups: Record<string, string>): Promise<void> {
+    for (const [fieldLabel, optionText] of Object.entries(groups)) {
+      // Find the dropdown for this field (e.g., the "Sales?" textbox)
+      const dropdown = this.page.getByRole('textbox', { name: new RegExp(fieldLabel, 'i') });
+      if (await dropdown.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await dropdown.click();
+        await this.page.waitForTimeout(300);
+
+        // Clear existing value and type the option
+        await dropdown.fill('');
+        await this.page.waitForTimeout(200);
+        await dropdown.fill(optionText);
+        await this.page.waitForTimeout(500);
+
+        // Select from the autocomplete dropdown
+        const autocompleteOption = this.page.locator('.o-autocomplete--dropdown-item, .o_m2o_dropdown_option, .ui-menu-item').filter({ hasText: optionText }).first();
+        if (await autocompleteOption.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await autocompleteOption.click();
+        } else {
+          // Try pressing Enter to select the first match
+          await dropdown.press('Enter');
+        }
+        await this.page.waitForTimeout(300);
+      }
+    }
   }
 
   /**
