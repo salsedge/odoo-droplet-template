@@ -93,9 +93,16 @@ test('verify all modules appear in app menu', async ({ adminPage }) => {
 
 ### Run
 
+For local testing:
 ```bash
 cd odookit
-npm run setup:local  # or target production via SSH tunnel
+npm run setup:local
+```
+
+For production (via SSH tunnel):
+```bash
+cd odookit
+npm run test:prod -- --grep "Module installation"
 ```
 
 ---
@@ -104,25 +111,23 @@ npm run setup:local  # or target production via SSH tunnel
 
 This is not automatable via OdooKit — it requires SCP + Docker restart + Odoo module install.
 
-### Steps
+### Prerequisites
+
+The Docker Compose stack needs the custom-addons volume mount (`/opt/odoo/custom-addons` -> `/mnt/extra-addons`). This was added in the `config/docker-compose.yml` and `config/odoo.conf` changes. If not yet applied to the droplet, upload and apply first:
 
 ```bash
-# 1. Copy module to server
-scp -P 9292 -r /usr/local/vol/shipyard/projects/other/ubop-lite/odoo_modules/loodon_proposals \
-  deploy@45.55.164.120:/opt/odoo/custom-addons/
-
-# 2. Fix ownership (Odoo container runs as uid 101)
-ssh -p 9292 deploy@45.55.164.120 \
-  "sudo chown -R 101:101 /opt/odoo/custom-addons/loodon_proposals"
-
-# 3. Restart Odoo to detect new module
-ssh -p 9292 deploy@45.55.164.120 "sudo docker restart odoo-app"
-
-# 4. Wait for Odoo to come back up (~30 seconds)
-sleep 30
+make upload
+make ssh
+# On the droplet: see Task 8 of the implementation plan for apply steps
 ```
 
-Then in the Odoo UI:
+### Deploy the module
+
+```bash
+make deploy-addon ADDON_PATH=../ubop-lite/odoo_modules/loodon_proposals
+```
+
+This uploads the module to `/opt/odoo/custom-addons/`, fixes ownership (uid 100, gid 101), and restarts Odoo. Then in the Odoo UI:
 1. Settings -> Developer Tools -> Activate Developer Mode
 2. Apps -> Update Apps List -> Update
 3. Search for "Loodon Proposals" -> Install
