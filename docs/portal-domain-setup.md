@@ -7,118 +7,106 @@
 
 ---
 
+## Quick Path
+
+Use `make set-domain` to execute all steps automatically:
+
+```bash
+make set-domain \
+  DOMAIN=portal.loodon.com \
+  CERT_EMAIL=admin@loodon.com \
+  ALIAS_DOMAIN=odoo.loodon.com
+```
+
+This uploads `scripts/ops/set-domain.sh` to the droplet and runs it. The script handles SSL, Nginx, and Odoo config in one pass with rollback on failure. See below for what it does and how to verify.
+
+---
+
 ## Summary
 
 Add `portal.loodon.com` as the primary domain for the Odoo instance. Keep `odoo.loodon.com` working as an alias that redirects to the primary domain.
 
-## Changes Required
+## What `set-domain.sh` Does
 
-### 1. SSL Certificate — Expand to Cover Both Domains
+The script (`scripts/ops/set-domain.sh`) executes seven steps:
 
-Current cert covers `odoo.loodon.com` only. Expand it to include `portal.loodon.com`.
+### 1. DNS Verification
+
+Confirms `portal.loodon.com` resolves to this server's public IP. Exits early if DNS hasn't propagated.
+
+### 2. SSL Certificate — Expand to Cover Both Domains
+
+Uses certbot's **webroot** method (consistent with initial setup via `04-setup-nginx.sh`):
 
 ```bash
-ssh -p 9292 deploy@45.55.164.120
+certbot certonly --webroot --webroot-path /var/www/certbot \
+  -d portal.loodon.com -d odoo.loodon.com \
+  --expand --keep-until-expiring --non-interactive --agree-tos --email admin@loodon.com
 ```
 
-```bash
-# Expand the Let's Encrypt certificate to cover both domains
-sudo certbot --nginx -d portal.loodon.com -d odoo.loodon.com --expand
-```
+**Note:** `--expand` adds domains to the existing certificate. The cert directory name stays as whatever certbot originally created (likely `/etc/letsencrypt/live/odoo.loodon.com/`). The script detects the actual path automatically.
 
-Certbot will update the Nginx config automatically if using the `--nginx` plugin. If it doesn't, or if the cert was originally obtained with `certonly`, apply the Nginx changes manually (see step 2).
+### 3. Certificate Path Detection
 
-**Verify:**
-```bash
-sudo certbot certificates
-```
+Parses `certbot certificates` output to find the live directory. Does not assume the path matches the primary domain name.
 
-Expected output should show both domains on the same certificate.
+### 4. Nginx — Deploy Multi-Domain Config
 
-### 2. Nginx — Update Server Blocks
+Backs up the current Nginx config, then deploys `config/nginx/odoo-multidomain.conf` with three server blocks:
 
-Two server blocks needed: one for the primary domain serving Odoo, one for the alias redirecting.
-
-**Edit the Nginx site config:**
-```bash
-sudo nano /etc/nginx/sites-available/odoo
-```
-
-**Primary server block** — update `server_name` to `portal.loodon.com`:
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name portal.loodon.com;
-
-    # SSL cert paths (updated by certbot)
-    ssl_certificate /etc/letsencrypt/live/portal.loodon.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/portal.loodon.com/privkey.pem;
-
-    # ... rest of existing config (proxy_pass, headers, etc.) unchanged ...
-}
-```
-
-**Alias redirect block** — add a new block that 301 redirects `odoo.loodon.com` to `portal.loodon.com`:
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name odoo.loodon.com;
-
-    ssl_certificate /etc/letsencrypt/live/portal.loodon.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/portal.loodon.com/privkey.pem;
-
-    return 301 https://portal.loodon.com$request_uri;
-}
-```
-
-**HTTP redirect blocks** — ensure both domains redirect HTTP to HTTPS (certbot usually handles this, but verify):
-
+**HTTP catch-all** — both domains redirect to `https://portal.loodon.com`:
 ```nginx
 server {
     listen 80;
     server_name portal.loodon.com odoo.loodon.com;
+    # certbot ACME challenge location preserved for renewals
     return 301 https://portal.loodon.com$request_uri;
 }
 ```
 
-**Test and reload:**
-```bash
-sudo nginx -t && sudo systemctl reload nginx
+**Primary HTTPS** — `portal.loodon.com` serves Odoo with full proxy config, security headers, HSTS, and route blocking.
+
+**Alias redirect** — `odoo.loodon.com` returns 301 to `portal.loodon.com`:
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name odoo.loodon.com;
+    return 301 https://portal.loodon.com$request_uri;
+}
 ```
 
-### 3. Odoo — Update web.base.url
+If `nginx -t` fails, the previous config is automatically restored.
 
-The `web.base.url` system parameter controls URLs in emails, portal links, and shared documents.
+### 5. Nginx Test and Reload
 
-**Option A: Via Odoo UI**
+```bash
+nginx -t && systemctl reload nginx
+```
+
+### 6. Odoo — Update web.base.url
+
+Updates `web.base.url` via psql (reads credentials from `/opt/odoo/.env`):
+
+```sql
+UPDATE ir_config_parameter SET value = 'https://portal.loodon.com' WHERE key = 'web.base.url';
+```
+
+**Idempotent:** If already set correctly, skips the update and Odoo restart.
+
+**Alternative — Via Odoo UI:**
 1. Log in to `https://portal.loodon.com/web`
 2. Settings -> Technical -> Parameters -> System Parameters
 3. Find `web.base.url`
 4. Change value to `https://portal.loodon.com`
 5. Save
 
-**Option B: Via psql**
-```bash
-sudo docker exec -it odoo-db psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c \
-  "UPDATE ir_config_parameter SET value = 'https://portal.loodon.com' WHERE key = 'web.base.url';"
-```
-
-Then restart Odoo to pick up the change:
-```bash
-sudo docker restart odoo-app
-```
-
-### 4. HSTS — Verify
-
-After the domain change, verify HSTS is working on the new primary domain:
+### 7. Odoo Restart
 
 ```bash
-curl -sI https://portal.loodon.com | grep -i strict
+docker restart odoo-app
 ```
 
-Expected: `Strict-Transport-Security: max-age=31536000`
+Only runs if `web.base.url` was actually changed.
 
 ## Verification Checklist
 
@@ -136,11 +124,27 @@ After all changes:
 
 ## Rollback
 
-If something goes wrong:
+If something goes wrong, the script's trap handler restores the previous Nginx config automatically on failure.
 
-1. Revert Nginx config to the original single-domain setup
-2. `sudo nginx -t && sudo systemctl reload nginx`
-3. Reset `web.base.url` to `https://odoo.loodon.com`
-4. `sudo docker restart odoo-app`
+For manual rollback:
+
+```bash
+ssh -p 9292 deploy@45.55.164.120
+```
+
+1. Restore Nginx config:
+   ```bash
+   # Find the backup (timestamped .bak file)
+   ls -la /etc/nginx/sites-available/odoo.conf.bak.*
+   sudo mv /etc/nginx/sites-available/odoo.conf.bak.<timestamp> /etc/nginx/sites-available/odoo.conf
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+
+2. Reset `web.base.url`:
+   ```bash
+   sudo docker exec odoo-db psql -U odoo -d odoo -c \
+     "UPDATE ir_config_parameter SET value = 'https://odoo.loodon.com' WHERE key = 'web.base.url';"
+   sudo docker restart odoo-app
+   ```
 
 The original cert for `odoo.loodon.com` remains valid; certbot `--expand` adds domains, it doesn't remove existing ones.
