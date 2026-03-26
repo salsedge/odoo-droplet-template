@@ -56,8 +56,11 @@ fi
 echo "=== Deploy Addon: ${MODULE_NAME} ==="
 
 # Fix ownership — Odoo container runs as uid 100, gid 101
+# Parent directory stays owned by deploy user (for SCP writes)
 echo "[1/3] Setting ownership (100:101)..."
 chown -R 100:101 "${MODULE_PATH}"
+# Ensure parent dir remains writable by deploy user for future SCPs
+chown deploy:deploy "${CUSTOM_ADDONS_DIR}"
 echo "  OK"
 
 # Restart Odoo to detect new/updated module
