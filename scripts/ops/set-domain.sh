@@ -273,11 +273,15 @@ NGINX_BACKUP=""
 # =============================================================================
 echo "[7/${TOTAL_STEPS}] Updating Odoo web.base.url..."
 
-# Source Postgres credentials from .env
-set -a
-# shellcheck source=/dev/null
-source "$ODOO_ENV"
-set +a
+# Read Postgres credentials from .env (grep, not source — passwords may contain
+# characters that bash interprets as commands when sourced)
+POSTGRES_USER=$(grep -E '^POSTGRES_USER=' "$ODOO_ENV" | head -1 | cut -d= -f2-)
+POSTGRES_DB=$(grep -E '^POSTGRES_DB=' "$ODOO_ENV" | head -1 | cut -d= -f2-)
+
+if [[ -z "$POSTGRES_USER" || -z "$POSTGRES_DB" ]]; then
+  echo "  ERROR: Could not read POSTGRES_USER or POSTGRES_DB from ${ODOO_ENV}" >&2
+  exit 1
+fi
 
 EXPECTED_URL="https://${PRIMARY_DOMAIN}"
 
