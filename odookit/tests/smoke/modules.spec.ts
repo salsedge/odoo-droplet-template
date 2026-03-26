@@ -23,6 +23,18 @@ test.describe('Module installation smoke tests', () => {
     expect(isInstalled).toBe(true);
   });
 
+  test('Sales module is installed', async ({ adminPage }) => {
+    const settings = new SettingsPage(adminPage);
+    const isInstalled = await settings.isModuleInstalled('Sales');
+    expect(isInstalled).toBe(true);
+  });
+
+  test('Invoicing module is installed', async ({ adminPage }) => {
+    const settings = new SettingsPage(adminPage);
+    const isInstalled = await settings.isModuleInstalled('Invoicing');
+    expect(isInstalled).toBe(true);
+  });
+
   test('CRM app is accessible from menu', async ({ adminPage }) => {
     const appMenu = new AppMenuPage(adminPage);
     const isAvailable = await appMenu.isAppInstalled('CRM');
@@ -32,6 +44,18 @@ test.describe('Module installation smoke tests', () => {
   test('Project app is accessible from menu', async ({ adminPage }) => {
     const appMenu = new AppMenuPage(adminPage);
     const isAvailable = await appMenu.isAppInstalled('Project');
+    expect(isAvailable).toBe(true);
+  });
+
+  test('Sales app is accessible from menu', async ({ adminPage }) => {
+    const appMenu = new AppMenuPage(adminPage);
+    const isAvailable = await appMenu.isAppInstalled('Sales');
+    expect(isAvailable).toBe(true);
+  });
+
+  test('Invoicing app is accessible from menu', async ({ adminPage }) => {
+    const appMenu = new AppMenuPage(adminPage);
+    const isAvailable = await appMenu.isAppInstalled('Invoicing');
     expect(isAvailable).toBe(true);
   });
 });
