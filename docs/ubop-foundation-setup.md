@@ -107,9 +107,14 @@ npm run test:prod -- --grep "Module installation"
 
 ---
 
-## Phase 2: Deploy `loodon_proposals` Custom Module (Task 8, Steps 2-6)
+## Phase 2: Deploy Custom Modules (Task 8, Steps 2-6)
 
-This is not automatable via OdooKit — it requires SCP + Docker restart + Odoo module install.
+Two custom modules from `ubop-lite/odoo_modules/` need to be deployed:
+
+| Module | Technical Name | Purpose |
+|--------|---------------|---------|
+| Loodon CRM Extensions | `loodon_crm` | 11 custom fields on `crm.lead` (scoring, qualification, discovery) |
+| Loodon Proposals | `loodon_proposals` | Proposal PDF reports with style variants on `sale.order` |
 
 ### Prerequisites
 
@@ -121,16 +126,20 @@ make ssh
 # On the droplet: see Task 8 of the implementation plan for apply steps
 ```
 
-### Deploy the module
+### Deploy both modules
 
 ```bash
+make deploy-addon ADDON_PATH=../ubop-lite/odoo_modules/loodon_crm
 make deploy-addon ADDON_PATH=../ubop-lite/odoo_modules/loodon_proposals
 ```
 
-This uploads the module to `/opt/odoo/custom-addons/`, fixes ownership (uid 100, gid 101), and restarts Odoo. Then in the Odoo UI:
+This uploads each module to `/opt/odoo/custom-addons/`, fixes ownership (uid 100, gid 101), and restarts Odoo. Then in the Odoo UI:
 1. Settings -> Developer Tools -> Activate Developer Mode
 2. Apps -> Update Apps List -> Update
-3. Search for "Loodon Proposals" -> Install
+3. Search for "Loodon CRM Extensions" -> Install
+4. Search for "Loodon Proposals" -> Install
+
+Install `loodon_crm` first — it only depends on `crm`. Then `loodon_proposals` which depends on `sale_management` + `crm`.
 
 ### Verification (can be added to OdooKit audit)
 
@@ -138,18 +147,47 @@ After installation, verify via the Odoo UI or add a new audit test:
 
 ```typescript
 // tests/audit/custom-modules.spec.ts (new file)
-test('loodon_proposals module is installed', async ({ adminPage }) => {
-  const settings = new SettingsPage(adminPage);
-  const isInstalled = await settings.isModuleInstalled('Loodon Proposals');
-  expect(isInstalled).toBe(true);
-});
+import { test, expect } from '../../fixtures/auth.fixture.js';
+import { SettingsPage } from '../../pages/settings.page.js';
 
-test('Proposal tab visible on sale order form', async ({ adminPage }) => {
-  await adminPage.goto('/odoo/sales/quotations/new');
-  await adminPage.locator('.o_form_view').waitFor({ state: 'visible' });
+test.describe('Custom module verification', () => {
+  test('loodon_crm module is installed', async ({ adminPage }) => {
+    const settings = new SettingsPage(adminPage);
+    const isInstalled = await settings.isModuleInstalled('Loodon CRM Extensions');
+    expect(isInstalled).toBe(true);
+  });
 
-  const proposalTab = adminPage.getByRole('tab', { name: 'Proposal' });
-  await expect(proposalTab).toBeVisible();
+  test('loodon_proposals module is installed', async ({ adminPage }) => {
+    const settings = new SettingsPage(adminPage);
+    const isInstalled = await settings.isModuleInstalled('Loodon Proposals');
+    expect(isInstalled).toBe(true);
+  });
+
+  test('Scoring tab visible on CRM lead form', async ({ adminPage }) => {
+    await adminPage.goto('/odoo/crm');
+    await adminPage.locator('.o_action_manager .o_view_controller').waitFor({ state: 'visible' });
+
+    // Create a new lead to see the form
+    const newButton = adminPage.locator('.o_list_button_add, .o_kanban_button_new').first();
+    if (await newButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await newButton.click();
+      await adminPage.locator('.o_form_view').waitFor({ state: 'visible' });
+    }
+
+    const scoringTab = adminPage.getByRole('tab', { name: 'Scoring' });
+    await expect(scoringTab).toBeVisible();
+
+    const discoveryTab = adminPage.getByRole('tab', { name: 'Discovery' });
+    await expect(discoveryTab).toBeVisible();
+  });
+
+  test('Proposal tab visible on sale order form', async ({ adminPage }) => {
+    await adminPage.goto('/odoo/sales/quotations/new');
+    await adminPage.locator('.o_form_view').waitFor({ state: 'visible' });
+
+    const proposalTab = adminPage.getByRole('tab', { name: 'Proposal' });
+    await expect(proposalTab).toBeVisible();
+  });
 });
 ```
 
@@ -294,11 +332,12 @@ The existing `tests/workflows/crm-lead.spec.ts` and `project-task.spec.ts` can b
 | Step | What | How | Automated? |
 |------|------|-----|-----------|
 | 1 | Install core modules | OdooKit `install-modules.spec.ts` (extended) | Yes |
-| 2 | Deploy `loodon_proposals` | SCP + Docker restart + UI install | Partially |
-| 3 | Configure company | OdooKit `system-settings.spec.ts` or manual | Yes |
-| 4 | Create users | OdooKit `create-team-users.spec.ts` | Yes |
-| 5 | Configure sales/invoicing | Manual Odoo UI | No |
-| 6 | Create project template | Manual Odoo UI | No |
-| 7 | Run smoke tests | `npm run test:smoke` | Yes |
-| 8 | Run full verification | `make verify-prod` | Yes |
-| 9 | Manual E2E walkthrough | Odoo UI | No |
+| 2 | Deploy `loodon_crm` + `loodon_proposals` | `make deploy-addon` x2 + UI install | Partially |
+| 3 | Verify custom modules | OdooKit `custom-modules.spec.ts` | Yes |
+| 4 | Configure company | OdooKit `system-settings.spec.ts` or manual | Yes |
+| 5 | Create users | OdooKit `create-team-users.spec.ts` | Yes |
+| 6 | Configure sales/invoicing | Manual Odoo UI | No |
+| 7 | Create project template | Manual Odoo UI | No |
+| 8 | Run smoke tests | `npm run test:smoke` | Yes |
+| 9 | Run full verification | `make verify-prod` | Yes |
+| 10 | Manual E2E walkthrough | Odoo UI | No |
