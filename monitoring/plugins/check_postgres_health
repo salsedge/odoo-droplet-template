@@ -44,9 +44,9 @@ CRIT_CONN=45
 WARN_SIZE=5368709120    # 5 GB
 CRIT_SIZE=10737418240   # 10 GB
 
-# Query latency thresholds (ms, includes docker exec overhead)
-WARN_LATENCY=100
-CRIT_LATENCY=500
+# Query latency thresholds (ms, includes docker exec overhead ~200-300ms on 2-vCPU)
+WARN_LATENCY=300
+CRIT_LATENCY=1000
 
 # Cache hit ratio thresholds (%, lower is worse)
 WARN_CACHE=90

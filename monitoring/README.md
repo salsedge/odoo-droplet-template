@@ -171,7 +171,7 @@ Monitors PostgreSQL database metrics via `docker exec` into the database contain
 |--------|---------------|-----------------|------------------|
 | Connections | Active connection count (`pg_stat_activity`) | >= 35 | >= 45 |
 | Database size | Size in bytes (`pg_database_size()`) | >= 5 GB | >= 10 GB |
-| Query latency | `SELECT 1` round-trip time (ms) | >= 100 ms | >= 500 ms |
+| Query latency | `SELECT 1` round-trip time (ms) | >= 300 ms | >= 1000 ms |
 | Cache hit ratio | Buffer cache effectiveness (`pg_stat_database`) | <= 90% | <= 80% |
 
 **Note:** Query latency includes `docker exec` overhead (~20-50ms). Thresholds account for this -- do not lower them to typical bare-metal psql values.
@@ -187,8 +187,8 @@ Monitors PostgreSQL database metrics via `docker exec` into the database contain
 | `--crit-conn` | `postgres_health_crit_conn` | `45` | Connection critical (of max 50) |
 | `--warn-size` | `postgres_health_warn_size` | `5368709120` | Size warning (5 GB in bytes) |
 | `--crit-size` | `postgres_health_crit_size` | `10737418240` | Size critical (10 GB in bytes) |
-| `--warn-latency` | `postgres_health_warn_latency` | `100` | Latency warning (ms) |
-| `--crit-latency` | `postgres_health_crit_latency` | `500` | Latency critical (ms) |
+| `--warn-latency` | `postgres_health_warn_latency` | `300` | Latency warning (ms, includes ~200-300ms docker exec overhead) |
+| `--crit-latency` | `postgres_health_crit_latency` | `1000` | Latency critical (ms) |
 | `--warn-cache` | `postgres_health_warn_cache` | `90` | Cache hit warning (%, below = warn) |
 | `--crit-cache` | `postgres_health_crit_cache` | `80` | Cache hit critical (%, below = crit) |
 
@@ -234,7 +234,7 @@ The Icinga2 variable resolution order is: service vars > host vars > command def
 | UNKNOWN: container not found | Wrong container name | Check `docker ps --format '{{.Names}}'` and update `--containers` or `--container` argument |
 | UNKNOWN: plugin not found | Wrong plugin path or missing file | Verify plugin exists at `CustomPluginDir` path; check `ls -la /usr/lib/nagios/plugins/custom/` |
 | CRITICAL but container looks healthy | Stale Docker state after daemon restart | Run `docker inspect <container>` manually to verify; restart the container if state is inconsistent |
-| Latency always 30-60ms even when idle | Normal docker exec overhead | This is expected behaviour; do not lower `--warn-latency` below 100ms |
+| Latency always 200-300ms even when idle | Normal docker exec overhead on 2-vCPU droplet | This is expected behaviour; do not lower `--warn-latency` below 300ms |
 | Cache hit ratio UNKNOWN after restart | No block reads yet on fresh database | Treat as transient; ratio stabilises after normal query activity |
 | Perfdata not graphing | Label format issue or graphing backend not configured | Verify perfdata labels contain no spaces; check Icinga2 PerfdataWriter or Graphite/InfluxDB integration |
 | Service not appearing in dashboard | Missing `vars.odoo_host = true` on host | Add the custom variable to the host object and reload Icinga2 |
