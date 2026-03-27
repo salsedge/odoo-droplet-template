@@ -14,13 +14,15 @@ import { type Page } from '@playwright/test';
  */
 
 // Map of known app names to their Odoo 19 URL paths
+// Map of known app names to their Odoo 19 URL paths.
+// Only apps with confirmed clean URL routes belong here.
+// Sales and Invoicing use action-based routing (no clean path) —
+// they fall through to _isInHomeMenu / _openViaHomeMenu instead.
 const APP_URL_MAP: Record<string, string> = {
   'CRM': '/odoo/crm',
   'Project': '/odoo/project',
   'Settings': '/odoo/settings',
   'Contacts': '/odoo/contacts',
-  'Sales': '/odoo/sales',
-  'Invoicing': '/odoo/accounting',
   'Inventory': '/odoo/inventory',
   'Purchase': '/odoo/purchase',
 };
