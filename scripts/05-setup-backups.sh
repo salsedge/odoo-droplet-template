@@ -22,7 +22,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="${CONFIG_DIR:-$(dirname "$SCRIPT_DIR")/config}"
 DEPLOY_DIR="/opt/odoo"
-VOLUME_MOUNT="/mnt/odoo-prod-data"
+VOLUME_MOUNT="${VOLUME_MOUNT:-/mnt/odoo-prod-data}"
+RCLONE_REMOTE="${RCLONE_REMOTE:-spaces:odoo-prod-backups}"
 ENV_FILE="${DEPLOY_DIR}/.env"
 
 echo "=== Phase 3 / Plan 03-01: Backup Infrastructure Setup ==="
@@ -176,10 +177,10 @@ echo "  Created: ${VOLUME_MOUNT}/backups/weekly"
 # =============================================================================
 echo "--- Testing rclone connectivity ---"
 
-if rclone lsd --config "${RCLONE_DEST}" spaces:odoo-prod-backups &>/dev/null; then
-  echo "  rclone: Connected to spaces:odoo-prod-backups"
+if rclone lsd --config "${RCLONE_DEST}" "${RCLONE_REMOTE}" &>/dev/null; then
+  echo "  rclone: Connected to ${RCLONE_REMOTE}"
 else
-  echo "  WARNING: rclone could not list spaces:odoo-prod-backups"
+  echo "  WARNING: rclone could not list ${RCLONE_REMOTE}"
   echo "  Verify SPACES_ACCESS_KEY and SPACES_SECRET_KEY in ${ENV_FILE}"
   echo "  (This may be expected if the bucket doesn't exist yet)"
 fi

@@ -25,7 +25,9 @@ set -euo pipefail
 # =============================================================================
 # Constants
 # =============================================================================
-BACKUP_DIR="/mnt/odoo-prod-data/backups"
+VOLUME_MOUNT="${VOLUME_MOUNT:-/mnt/odoo-prod-data}"
+BACKUP_DIR="${VOLUME_MOUNT}/backups"
+RCLONE_REMOTE="${RCLONE_REMOTE:-spaces:odoo-prod-backups}"
 RCLONE_CONF="/opt/odoo/rclone.conf"
 ENV_FILE="/opt/odoo/.env"
 COMPOSE_FILE="/opt/odoo/docker-compose.yml"
@@ -194,7 +196,7 @@ elif [[ "${FROM_SPACES}" == true ]]; then
 
   YEAR="${RESTORE_DATE:0:4}"
   MONTH="${RESTORE_DATE:5:2}"
-  REMOTE_PATH="spaces:odoo-prod-backups/${YEAR}/${MONTH}/"
+  REMOTE_PATH="${RCLONE_REMOTE}/${YEAR}/${MONTH}/"
 
   TEMP_DIR=$(mktemp -d /tmp/odoo-restore-XXXXXX)
   echo "Fetching backup from DO Spaces: ${REMOTE_PATH}"
@@ -480,7 +482,7 @@ if [[ "${PRODUCTION}" == true ]]; then
   if [[ -n "${FILESTORE_ARCHIVE}" ]]; then
     echo "[3/4] Restoring filestore..."
 
-    FILESTORE_DIR="/mnt/odoo-prod-data/odoo-filestore"
+    FILESTORE_DIR="${VOLUME_MOUNT}/odoo-filestore"
 
     # Backup current filestore (safety net)
     if [[ -d "${FILESTORE_DIR}" ]]; then
@@ -488,7 +490,7 @@ if [[ "${PRODUCTION}" == true ]]; then
     fi
 
     # Extract filestore archive
-    tar -xzf "${FILESTORE_ARCHIVE}" -C /mnt/odoo-prod-data/
+    tar -xzf "${FILESTORE_ARCHIVE}" -C "${VOLUME_MOUNT}/"
 
     # Restore ownership (Odoo container: uid 100, gid 101)
     chown -R 100:101 "${FILESTORE_DIR}"

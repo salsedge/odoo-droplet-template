@@ -22,7 +22,9 @@ set -euo pipefail
 # Constants
 # =============================================================================
 RCLONE_CONF="/opt/odoo/rclone.conf"
-BACKUP_DIR="/mnt/odoo-prod-data/backups/daily"
+VOLUME_MOUNT="${VOLUME_MOUNT:-/mnt/odoo-prod-data}"
+BACKUP_DIR="${VOLUME_MOUNT}/backups/daily"
+RCLONE_REMOTE="${RCLONE_REMOTE:-spaces:odoo-prod-backups}"
 ENV_FILE="/opt/odoo/.env"
 SYNC_STATUS_FILE="/opt/odoo/sync-status.json"
 TODAY="$(date +%Y-%m-%d)"
@@ -103,9 +105,9 @@ fi
 # Sync today's backups to DO Spaces (BACK-02)
 # =============================================================================
 # Use rclone copy (NOT sync) — sync would delete older remote backups
-# Organize by year/month: spaces:odoo-prod-backups/YYYY/MM/
+# Organize by year/month: ${RCLONE_REMOTE}/YYYY/MM/
 
-REMOTE_PATH="spaces:odoo-prod-backups/${YEAR}/${MONTH}/"
+REMOTE_PATH="${RCLONE_REMOTE}/${YEAR}/${MONTH}/"
 
 echo "[$(date -Iseconds)] Copying to ${REMOTE_PATH}..."
 

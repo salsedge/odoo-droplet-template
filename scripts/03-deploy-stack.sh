@@ -24,7 +24,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="${CONFIG_DIR:-$(dirname "$SCRIPT_DIR")/config}"
-VOLUME_MOUNT="/mnt/odoo-prod-data"
+VOLUME_MOUNT="${VOLUME_MOUNT:-/mnt/odoo-prod-data}"
 DEPLOY_DIR="/opt/odoo"
 
 echo "=== Phase 2 / Plan 02-02: Docker Application Stack ==="

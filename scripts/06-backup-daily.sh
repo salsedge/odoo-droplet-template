@@ -23,8 +23,9 @@ set -euo pipefail
 # =============================================================================
 # Constants
 # =============================================================================
-BACKUP_DIR="/mnt/odoo-prod-data/backups"
-FILESTORE_DIR="/mnt/odoo-prod-data/odoo-filestore"
+VOLUME_MOUNT="${VOLUME_MOUNT:-/mnt/odoo-prod-data}"
+BACKUP_DIR="${VOLUME_MOUNT}/backups"
+FILESTORE_DIR="${VOLUME_MOUNT}/odoo-filestore"
 ENV_FILE="/opt/odoo/.env"
 STATUS_FILE="/opt/odoo/backup-status.json"
 LOG_TAG="odoo-backup"
@@ -100,11 +101,11 @@ if [[ "${DB_HEALTH}" != "healthy" ]]; then
 fi
 
 # Check available disk space on backup volume (fail if less than 2GB free)
-AVAIL_KB=$(df --output=avail /mnt/odoo-prod-data 2>/dev/null | tail -1 | tr -d ' ')
+AVAIL_KB=$(df --output=avail "${VOLUME_MOUNT}" 2>/dev/null | tail -1 | tr -d ' ')
 AVAIL_KB="${AVAIL_KB:-0}"
 MIN_KB=2097152  # 2 GB in KB
 if [[ "${AVAIL_KB}" -lt "${MIN_KB}" ]]; then
-  echo "ERROR: Insufficient disk space on /mnt/odoo-prod-data (${AVAIL_KB} KB available, need ${MIN_KB} KB)" >&2
+  echo "ERROR: Insufficient disk space on ${VOLUME_MOUNT} (${AVAIL_KB} KB available, need ${MIN_KB} KB)" >&2
   exit 1
 fi
 
@@ -183,7 +184,7 @@ FILES_FILE="${BACKUP_DIR}/daily/odoo-files-${TODAY}.tar.gz"
 tar -czf "${FILES_TEMP}" \
   --exclude='sessions' \
   --exclude='addons' \
-  -C /mnt/odoo-prod-data \
+  -C "${VOLUME_MOUNT}" \
   odoo-filestore/
 
 mv "${FILES_TEMP}" "${FILES_FILE}"
