@@ -28,6 +28,8 @@ SSH_USER     ?= deploy
 SSH_KEY      ?= ~/.ssh/id_ed25519
 DOMAIN       ?=
 CERT_EMAIL   ?=
+ALIAS_DOMAIN ?=
+ADDON_PATH   ?=
 REMOTE_DIR   := /tmp/odoo-setup
 
 # Resolve droplet IP from terraform if not set
@@ -118,6 +120,27 @@ deploy-host: upload run-harden run-docker ## Upload and run host hardening + Doc
 deploy-app: upload run-stack run-nginx ## Upload and deploy application stack + Nginx
 
 # ---------------------------------------------------------------------------
+# Operations — day-2 tasks (scripts/ops/)
+# ---------------------------------------------------------------------------
+
+.PHONY: set-domain
+set-domain: upload ## Change primary domain (requires DOMAIN, CERT_EMAIL; optional ALIAS_DOMAIN)
+	@[ -n "$(DROPLET_IP)" ] || { echo "ERROR: DROPLET_IP not set"; exit 1; }
+	@[ -n "$(DOMAIN)" ] || { echo "ERROR: DOMAIN not set (e.g., make set-domain DOMAIN=portal.example.com CERT_EMAIL=admin@example.com)"; exit 1; }
+	@[ -n "$(CERT_EMAIL)" ] || { echo "ERROR: CERT_EMAIL not set"; exit 1; }
+	$(SSH_CMD) "sudo bash $(REMOTE_DIR)/scripts/ops/set-domain.sh $(DOMAIN) $(CERT_EMAIL) $(ALIAS_DOMAIN)"
+
+.PHONY: deploy-addon
+deploy-addon: upload ## Deploy custom Odoo module (requires ADDON_PATH=local/path/to/module)
+	@[ -n "$(DROPLET_IP)" ] || { echo "ERROR: DROPLET_IP not set"; exit 1; }
+	@[ -n "$(ADDON_PATH)" ] || { echo "ERROR: ADDON_PATH not set (e.g., make deploy-addon ADDON_PATH=../ubop-lite/odoo_modules/loodon_proposals)"; exit 1; }
+	@[ -d "$(ADDON_PATH)" ] || { echo "ERROR: $(ADDON_PATH) is not a directory"; exit 1; }
+	@echo "Uploading $(ADDON_PATH) to droplet..."
+	$(SCP_CMD) -r $(ADDON_PATH) $(SSH_USER)@$(DROPLET_IP):/opt/odoo/custom-addons/
+	@echo "Running deploy-addon.sh on droplet..."
+	$(SSH_CMD) "sudo bash $(REMOTE_DIR)/scripts/ops/deploy-addon.sh $$(basename $(ADDON_PATH))"
+
+# ---------------------------------------------------------------------------
 # Remote status checks
 # ---------------------------------------------------------------------------
 
@@ -170,7 +193,7 @@ test-local: ## Run OdooKit tests against local Docker Compose stack
 
 .PHONY: lint
 lint: ## Shellcheck all deployment scripts
-	shellcheck scripts/*.sh
+	shellcheck scripts/*.sh scripts/ops/*.sh
 
 .PHONY: validate
 validate: ## Validate Terraform configuration

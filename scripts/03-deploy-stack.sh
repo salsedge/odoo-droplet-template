@@ -78,6 +78,11 @@ chown -R 999:999 "${VOLUME_MOUNT}/postgres-data"
 # Odoo 19 container runs as uid 100, gid 101 (odoo)
 chown -R 100:101 "${VOLUME_MOUNT}/odoo-filestore"
 
+# Custom addons directory (mounted into Odoo container at /mnt/extra-addons)
+# Owned by deploy user so SCP can write modules; deploy-addon.sh chowns contents to 100:101
+mkdir -p "${DEPLOY_DIR}/custom-addons"
+chown deploy:deploy "${DEPLOY_DIR}/custom-addons"
+
 echo "Data directories created on Block Storage Volume:"
 echo "  ${VOLUME_MOUNT}/postgres-data (uid:999)"
 echo "  ${VOLUME_MOUNT}/odoo-filestore (uid:101)"

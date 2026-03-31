@@ -168,9 +168,11 @@ When modifying plans or requirements, update the relevant `.planning/` file and 
 ## Current Status
 
 - **Phase 1** — Complete (Terraform infrastructure provisioned)
-- **Phase 2** — Complete (scripts and configs written, pending execution on droplet)
+- **Phase 2** — Complete (scripts and configs written, executed on droplet)
 - **Phase 3** — Complete (Backup scripts, restore verification, documentation)
-- **Phase 4** — Not started (Playwright E2E Testing and Odoo Verification)
-- **Phase 5** — Not started (Deployment Verification and User Setup)
-- **Phase 6** — Not started (Monitoring — blocked on external Icinga2 master)
-- **Overall:** ~50% complete (3/6 phases)
+- **Phase 4** — Complete (Playwright E2E Testing and Odoo Verification)
+- **Phase 5** — Complete (Deployment verified, users set up on production)
+- **Phase 6** — Complete (Monitoring plugins and service definitions delivered; live Icinga2 verification deferred to Icinga2 master project)
+- **Overall:** v1.0 Milestone Complete (6/6 phases)
+- **Droplet:** `45.55.164.120` / `loodon-prod-01-odoo` — live and serving
+- **Next:** Odoo CRM/Sales buildout tracked in `../ubop-lite/`

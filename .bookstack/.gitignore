@@ -1,0 +1,3 @@
+# Ignore local overrides with secrets, track defaults
+.env
+!defaults.env

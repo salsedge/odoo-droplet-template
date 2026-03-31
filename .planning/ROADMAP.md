@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Hardened Application Stack** - Harden the host, deploy containerized Odoo and PostgreSQL, configure Nginx reverse proxy with Let's Encrypt SSL (completed 2026-03-12)
 - [x] **Phase 3: Backup, Recovery, and Documentation** - Automated backups with tested restore, deployment runbook, and operational procedures (completed 2026-03-18)
 - [x] **Phase 4: Playwright E2E Testing and Odoo Verification** - Automated browser tests for post-deploy verification, backup restore validation, user management, and configuration auditing (completed 2026-03-18)
-- [ ] **Phase 5: Deployment Verification and User Setup** - Use Playwright test suite to create user accounts and verify all system components end-to-end with real users
+- [x] **Phase 5: Deployment Verification and User Setup** - Use Playwright test suite to create user accounts and verify all system components end-to-end with real users (completed 2026-03-23)
 - [ ] **Phase 6: Monitoring** - Install Icinga2 agent and custom checks for containers, PostgreSQL, and system resources (blocked on external Icinga2 master)
 
 ## Phase Details
@@ -103,8 +103,8 @@ Plans:
 **Plans**: 3 plans (3 waves)
 
 Plans:
-- [ ] 05-01-PLAN.md -- Production targeting infrastructure: SSH tunnel, backup verification, team members config, Playwright config updates (Wave 1)
-- [ ] 05-02-PLAN.md -- Production user creation test and orchestration script with fail-fast safety gates (Wave 2, depends: 05-01)
+- [x] 05-01-PLAN.md -- Production targeting infrastructure: SSH tunnel, backup verification, team members config, Playwright config updates (Wave 1)
+- [x] 05-02-PLAN.md -- Production user creation test and orchestration script with fail-fast safety gates (Wave 2, depends: 05-01)
 - [ ] 05-03-PLAN.md -- Two-stage execution: local dry run + production verification human checkpoint (Wave 3, depends: 05-02)
 
 ### Phase 6: Monitoring
@@ -116,10 +116,11 @@ Plans:
   2. Stopping the Odoo or PostgreSQL container triggers a critical alert on the Icinga2 master within the check interval
   3. System resource checks (CPU, memory, disk, load average) and PostgreSQL-specific checks (connections, database size, query latency) report OK under normal operation and escalate when thresholds are breached
   4. Service definition files are provided and documented so the Icinga2 master admin can integrate them
-**Plans**: TBD
+**Plans**: 2 plans (1 wave)
 
 Plans:
-- [ ] 06-01: TBD
+- [x] 06-01-PLAN.md -- Custom check plugins: Docker container health (check_docker_stack) and PostgreSQL metrics (check_postgres_health) (Wave 1)
+- [x] 06-02-PLAN.md -- Icinga2 service definition templates (commands, services, notifications) and integration README (Wave 1)
 
 ## Progress
 
@@ -133,5 +134,5 @@ Note: Phase 6 (Monitoring) is blocked on external Icinga2 master availability.
 | 2. Hardened Application Stack | 3/3 | Complete    | 2026-03-12 |
 | 3. Backup, Recovery, and Documentation | 3/3 | Complete    | 2026-03-18 |
 | 4. Playwright E2E Testing and Odoo Verification | 4/4 | Complete    | 2026-03-18 |
-| 5. Deployment Verification and User Setup | 0/3 | Not started | - |
-| 6. Monitoring | 0/1 | Not started (blocked on Icinga2 master) | - |
+| 5. Deployment Verification and User Setup | 3/3 | Complete | 2026-03-23 |
+| 6. Monitoring | 2/2 | Complete | 2026-03-22 |

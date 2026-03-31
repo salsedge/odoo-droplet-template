@@ -40,6 +40,20 @@ test.describe('Odoo UI audit', () => {
     expect(isInstalled).toBe(true);
   });
 
+  test('Sales module is installed and accessible', async ({ adminPage }) => {
+    const settings = new SettingsPage(adminPage);
+    const isInstalled = await settings.isModuleInstalled('Sales');
+
+    expect(isInstalled).toBe(true);
+  });
+
+  test('Invoicing module is installed and accessible', async ({ adminPage }) => {
+    const settings = new SettingsPage(adminPage);
+    const isInstalled = await settings.isModuleInstalled('Invoicing');
+
+    expect(isInstalled).toBe(true);
+  });
+
   test('admin master password is not default', async ({ adminPage }) => {
     // ODOO-05: Verify database manager route is blocked.
     // Requires Nginx 403 on /web/database/* — skips on local Docker

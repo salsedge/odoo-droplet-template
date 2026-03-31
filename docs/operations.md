@@ -420,7 +420,58 @@ sudo systemctl reload nginx
 | HTTP-01 challenge fails | Port 80 blocked | Check UFW: `sudo ufw status`, check cloud firewall |
 | OCSP stapling errors in Nginx | DNS resolver unreachable | Verify `resolver 1.1.1.1 1.0.0.1` in Nginx config |
 
-## 8. Log Locations
+## 8. Domain Changes
+
+Change the primary domain (and optionally keep an alias that 301-redirects). Uses `scripts/ops/set-domain.sh` — a day-2 operational script separate from the numbered deploy sequence.
+
+### Change primary domain with alias redirect
+
+From your local machine:
+
+```bash
+make set-domain \
+  DOMAIN=portal.loodon.com \
+  CERT_EMAIL=admin@loodon.com \
+  ALIAS_DOMAIN=odoo.loodon.com
+```
+
+This uploads files to the droplet and runs the domain change script, which:
+
+1. Verifies DNS resolution
+2. Expands the SSL certificate to cover both domains (webroot method)
+3. Deploys a multi-domain Nginx config (primary serves Odoo, alias 301-redirects)
+4. Updates Odoo's `web.base.url` system parameter
+5. Restarts Odoo (only if `web.base.url` changed)
+
+The script is **idempotent** — safe to re-run. It backs up the Nginx config before changes and restores it automatically if `nginx -t` fails.
+
+### Change primary domain without alias
+
+```bash
+make set-domain DOMAIN=portal.loodon.com CERT_EMAIL=admin@loodon.com
+```
+
+### Verify after domain change
+
+```bash
+curl -sI https://portal.loodon.com | head -5          # Should show 200/302
+curl -sI https://odoo.loodon.com | head -5             # Should show 301 (if alias set)
+curl -sI https://portal.loodon.com | grep -i strict    # HSTS header
+sudo certbot certificates                               # Both domains on one cert
+```
+
+### Manual domain change (on the droplet)
+
+If you need to run the script directly without Make:
+
+```bash
+ssh -p 9292 deploy@45.55.164.120
+sudo bash /tmp/odoo-setup/scripts/ops/set-domain.sh portal.loodon.com admin@loodon.com odoo.loodon.com
+```
+
+See [Portal Domain Setup](portal-domain-setup.md) for the full procedure details, verification checklist, and rollback instructions.
+
+## 9. Log Locations
 
 ### Application logs
 
@@ -497,7 +548,7 @@ journalctl -u docker --since "1 hour ago"
 sudo tail -f /var/log/msmtp.log
 ```
 
-## 9. Emergency Procedures
+## 10. Emergency Procedures
 
 ### Odoo is down (container stopped or crashed)
 

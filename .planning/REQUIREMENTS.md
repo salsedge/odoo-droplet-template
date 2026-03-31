@@ -63,11 +63,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Monitoring
 
-- [ ] **MON-01**: Icinga2 agent installed on host and registered with existing Icinga2 master
-- [ ] **MON-02**: Custom check monitors Docker container health (running, restart count, resource usage)
-- [ ] **MON-03**: Custom check monitors PostgreSQL (connections, database size, query latency)
-- [ ] **MON-04**: System resource checks (CPU, memory, disk usage, load average)
-- [ ] **MON-05**: Icinga2 service definitions provided for integration with master
+- [x] **MON-01**: Icinga2 agent installed on host and registered with existing Icinga2 master (handled by Icinga2 master project; documented in monitoring/README.md)
+- [x] **MON-02**: Custom check monitors Docker container health (running, restart count, resource usage)
+- [x] **MON-03**: Custom check monitors PostgreSQL (connections, database size, query latency)
+- [x] **MON-04**: System resource checks (CPU, memory, disk usage, load average) (handled by Icinga2 master project; documented in monitoring/README.md)
+- [x] **MON-05**: Icinga2 service definitions provided for integration with master
 
 ### Backup and Recovery
 
@@ -174,11 +174,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOC-02 | Phase 3 | Complete |
 | DOC-03 | Phase 3 | Complete |
 | DOC-04 | Phase 3 | Complete |
-| MON-01 | Phase 5 | Pending |
-| MON-02 | Phase 5 | Pending |
-| MON-03 | Phase 5 | Pending |
-| MON-04 | Phase 5 | Pending |
-| MON-05 | Phase 5 | Pending |
+| MON-01 | Phase 6 | Complete (external) |
+| MON-02 | Phase 6 | Complete |
+| MON-03 | Phase 6 | Complete |
+| MON-04 | Phase 6 | Complete (external) |
+| MON-05 | Phase 6 | Complete |
 
 **Phase 4 note:** Phase 4 (Deployment Verification and User Setup) introduces no new requirements. It is a cross-cutting integration verification phase that validates Phases 1-3 requirements work together end-to-end with real user accounts. MON requirements are verified separately in Phase 5 when the Icinga2 master is available.
 

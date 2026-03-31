@@ -76,6 +76,7 @@ services:
     volumes:
       - /mnt/odoo-prod-data/odoo-filestore:/var/lib/odoo
       - ./odoo.conf:/etc/odoo/odoo.conf:ro
+      - /opt/odoo/custom-addons:/mnt/extra-addons:ro
 
     # Localhost-only binding — only reachable from host Nginx
     ports:
