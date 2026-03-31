@@ -42,4 +42,4 @@ ICINGA2_ENABLED="false"
 ICINGA2_MASTER=""                 # Hostname of Icinga2 master
 
 # --- OdooKit (optional) ---
-ODOOKIT_REPO="https://github.com/salsedge/odookit"
+ODOOKIT_REPO="git@github.com:salsedge/odookit.git"
