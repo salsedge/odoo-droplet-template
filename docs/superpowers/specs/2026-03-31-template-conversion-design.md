@@ -153,6 +153,7 @@ Reads `instance.conf`, produces all instance-specific files using heredocs with 
 | `infra/terraform.tfvars` | `PROJECT_NAME`, `DO_REGION`, `DROPLET_SIZE`, `VOLUME_SIZE_GB`, `SSH_KEY_FINGERPRINT`, `SSH_PORT` |
 | `config/.env` | `DB_NAME`, `DB_USER`, DB passwords (random), Odoo admin password (random) |
 | `config/odoo.conf` | `DB_NAME`, `DB_USER`, admin password token |
+| `config/docker-compose.yml` | `PROJECT_NAME` (volume mount path) |
 | `config/nginx/odoo-pre-ssl.conf` | `PRIMARY_DOMAIN` |
 | `config/nginx/odoo.conf` | `PRIMARY_DOMAIN`, `ALIAS_DOMAINS`, `DOMAIN_MODE` (branches to single or multi template) |
 | `config/rclone.conf` | `BACKUP_BUCKET`, `SPACES_REGION` |
@@ -257,6 +258,7 @@ infra/backend.tf
 infra/terraform.tfvars
 config/.env
 config/odoo.conf
+config/docker-compose.yml
 config/nginx/odoo-pre-ssl.conf
 config/nginx/odoo.conf
 config/rclone.conf
