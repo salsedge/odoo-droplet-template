@@ -2,6 +2,8 @@
 
 Day-to-day management procedures for the Odoo 19.x production deployment. Each section is self-contained -- jump to the procedure you need.
 
+> Values in `{BRACES}` reference keys from `instance.conf`.
+
 **Connection info:**
 
 ```bash
@@ -26,12 +28,12 @@ Two cron jobs run daily (in `/etc/cron.d/odoo-backup`):
 - Remote (DO Spaces): 30 days (managed by Spaces lifecycle rule)
 - Weekly = Sunday's daily backup promoted to `weekly/` directory
 
-**Remote retention depends on a Spaces lifecycle rule.** The backup scripts handle local cleanup automatically, but Spaces expiration requires a lifecycle rule configured on the `odoo-prod-backups` bucket. To verify the rule is active:
+**Remote retention depends on a Spaces lifecycle rule.** The backup scripts handle local cleanup automatically, but Spaces expiration requires a lifecycle rule configured on the `{PROJECT_NAME}-backups` bucket. To verify the rule is active:
 
 ```bash
 aws s3api get-bucket-lifecycle-configuration \
   --endpoint-url https://nyc3.digitaloceanspaces.com \
-  --bucket odoo-prod-backups
+  --bucket {PROJECT_NAME}-backups
 ```
 
 If the command returns an error or no rules, backups will accumulate indefinitely. See the [Deployment Runbook](deployment-runbook.md) Step 2 (item 4) for full setup instructions using either the DO Console or awscli.
@@ -43,8 +45,8 @@ sudo /opt/odoo/scripts/06-backup-daily.sh
 ```
 
 This creates:
-- `/mnt/odoo-prod-data/backups/daily/odoo-db-YYYY-MM-DD.dump` (PostgreSQL custom format)
-- `/mnt/odoo-prod-data/backups/daily/odoo-files-YYYY-MM-DD.tar.gz` (Odoo filestore)
+- `/mnt/{PROJECT_NAME}-data/backups/daily/odoo-db-YYYY-MM-DD.dump` (PostgreSQL custom format)
+- `/mnt/{PROJECT_NAME}-data/backups/daily/odoo-files-YYYY-MM-DD.tar.gz` (Odoo filestore)
 
 ### Check backup status
 
@@ -71,16 +73,16 @@ Status codes follow Nagios convention: 0=OK, 1=WARNING, 2=CRITICAL.
 
 ```bash
 # Daily backups
-ls -la /mnt/odoo-prod-data/backups/daily/
+ls -la /mnt/{PROJECT_NAME}-data/backups/daily/
 
 # Weekly backups
-ls -la /mnt/odoo-prod-data/backups/weekly/
+ls -la /mnt/{PROJECT_NAME}-data/backups/weekly/
 ```
 
 ### List remote backups (DO Spaces)
 
 ```bash
-rclone ls --config /opt/odoo/rclone.conf spaces:odoo-prod-backups/
+rclone ls --config /opt/odoo/rclone.conf spaces:{PROJECT_NAME}-backups/
 ```
 
 ### Manually trigger offsite sync
@@ -92,9 +94,9 @@ sudo /opt/odoo/scripts/07-sync-offsite.sh
 ### Check backup disk usage
 
 ```bash
-du -sh /mnt/odoo-prod-data/backups/daily/
-du -sh /mnt/odoo-prod-data/backups/weekly/
-df -h /mnt/odoo-prod-data/
+du -sh /mnt/{PROJECT_NAME}-data/backups/daily/
+du -sh /mnt/{PROJECT_NAME}-data/backups/weekly/
+df -h /mnt/{PROJECT_NAME}-data/
 ```
 
 ## 2. Restore Operations
@@ -109,7 +111,7 @@ sudo bash /opt/odoo/scripts/08-restore-backup.sh --verify-only
 
 # Verify a specific backup file
 sudo bash /opt/odoo/scripts/08-restore-backup.sh --verify-only \
-  --file /mnt/odoo-prod-data/backups/daily/odoo-db-2026-03-15.dump
+  --file /mnt/{PROJECT_NAME}-data/backups/daily/odoo-db-2026-03-15.dump
 ```
 
 The verification checks:
@@ -124,7 +126,7 @@ The verification checks:
 
 ```bash
 sudo bash /opt/odoo/scripts/08-restore-backup.sh --production \
-  --file /mnt/odoo-prod-data/backups/daily/odoo-db-2026-03-15.dump
+  --file /mnt/{PROJECT_NAME}-data/backups/daily/odoo-db-2026-03-15.dump
 ```
 
 ### Restore from DO Spaces (remote backup)
@@ -212,7 +214,7 @@ docker compose stop odoo
 
 # Restore from the pre-update backup
 sudo bash /opt/odoo/scripts/08-restore-backup.sh --production \
-  --file /mnt/odoo-prod-data/backups/daily/odoo-db-<pre-update-date>.dump
+  --file /mnt/{PROJECT_NAME}-data/backups/daily/odoo-db-<pre-update-date>.dump
 
 # Pull the previous image tag (if known)
 # docker pull odoo:19.0.YYYY.MM.DD
@@ -245,7 +247,7 @@ docker compose down
 
 # 4. Remove the old PostgreSQL data directory
 # WARNING: This deletes all database data. You MUST have a verified backup.
-sudo rm -rf /mnt/odoo-prod-data/postgres-data/*
+sudo rm -rf /mnt/{PROJECT_NAME}-data/postgres-data/*
 
 # 5. Start the new PostgreSQL container (creates fresh data directory)
 docker compose up -d db
@@ -255,7 +257,7 @@ docker compose ps
 
 # 6. Restore the database from backup
 sudo bash /opt/odoo/scripts/08-restore-backup.sh --production \
-  --file /mnt/odoo-prod-data/backups/daily/odoo-db-$(date +%Y-%m-%d).dump
+  --file /mnt/{PROJECT_NAME}-data/backups/daily/odoo-db-$(date +%Y-%m-%d).dump
 
 # 7. Start Odoo
 docker compose up -d odoo
@@ -360,10 +362,10 @@ Terraform resizes the block device, but the filesystem needs to be expanded:
 lsblk
 
 # Expand ext4 filesystem (online, no downtime)
-sudo resize2fs /dev/disk/by-id/scsi-0DO_Volume_odoo-prod-data
+sudo resize2fs /dev/disk/by-id/scsi-0DO_Volume_{PROJECT_NAME}-data
 
 # Verify new size
-df -h /mnt/odoo-prod-data/
+df -h /mnt/{PROJECT_NAME}-data/
 ```
 
 `resize2fs` on ext4 can run online (while mounted) without downtime.
@@ -405,7 +407,7 @@ sudo certbot delete --cert-name yourdomain.com
 # Reissue (ensure port 80 is accessible and DNS points to this server)
 sudo certbot certonly --webroot -w /var/www/certbot \
   -d yourdomain.com --non-interactive --agree-tos \
-  -m admin@youremail.com
+  -m {ADMIN_EMAIL}
 
 # Reload Nginx
 sudo systemctl reload nginx
@@ -430,9 +432,9 @@ From your local machine:
 
 ```bash
 make set-domain \
-  DOMAIN=portal.loodon.com \
-  CERT_EMAIL=admin@loodon.com \
-  ALIAS_DOMAIN=odoo.loodon.com
+  DOMAIN={PRIMARY_DOMAIN} \
+  CERT_EMAIL={ADMIN_EMAIL} \
+  ALIAS_DOMAIN={ALIAS_DOMAIN}
 ```
 
 This uploads files to the droplet and runs the domain change script, which:
@@ -448,15 +450,15 @@ The script is **idempotent** — safe to re-run. It backs up the Nginx config be
 ### Change primary domain without alias
 
 ```bash
-make set-domain DOMAIN=portal.loodon.com CERT_EMAIL=admin@loodon.com
+make set-domain DOMAIN={PRIMARY_DOMAIN} CERT_EMAIL={ADMIN_EMAIL}
 ```
 
 ### Verify after domain change
 
 ```bash
-curl -sI https://portal.loodon.com | head -5          # Should show 200/302
-curl -sI https://odoo.loodon.com | head -5             # Should show 301 (if alias set)
-curl -sI https://portal.loodon.com | grep -i strict    # HSTS header
+curl -sI https://{PRIMARY_DOMAIN} | head -5          # Should show 200/302
+curl -sI https://{ALIAS_DOMAIN} | head -5             # Should show 301 (if alias set)
+curl -sI https://{PRIMARY_DOMAIN} | grep -i strict    # HSTS header
 sudo certbot certificates                               # Both domains on one cert
 ```
 
@@ -465,11 +467,9 @@ sudo certbot certificates                               # Both domains on one ce
 If you need to run the script directly without Make:
 
 ```bash
-ssh -p 9292 deploy@45.55.164.120
-sudo bash /tmp/odoo-setup/scripts/ops/set-domain.sh portal.loodon.com admin@loodon.com odoo.loodon.com
+ssh -p 9292 deploy@$(terraform -chdir=infra output -raw droplet_ip)
+sudo bash /tmp/odoo-setup/scripts/ops/set-domain.sh {PRIMARY_DOMAIN} {ADMIN_EMAIL} {ALIAS_DOMAIN}
 ```
-
-See [Portal Domain Setup](portal-domain-setup.md) for the full procedure details, verification checklist, and rollback instructions.
 
 ## 9. Log Locations
 
@@ -586,14 +586,14 @@ docker compose -f /opt/odoo/docker-compose.yml restart odoo
 
 ```bash
 # Check disk usage
-df -h /mnt/odoo-prod-data/
-du -sh /mnt/odoo-prod-data/*/
+df -h /mnt/{PROJECT_NAME}-data/
+du -sh /mnt/{PROJECT_NAME}-data/*/
 
 # Check Docker log sizes (rotation should handle this, but verify)
 sudo du -sh /var/lib/docker/containers/*/
 
 # If backups are consuming too much space, clean old ones manually
-ls -la /mnt/odoo-prod-data/backups/daily/
+ls -la /mnt/{PROJECT_NAME}-data/backups/daily/
 # Remove oldest files as needed
 
 # If Docker logs are oversized (rotation failed)

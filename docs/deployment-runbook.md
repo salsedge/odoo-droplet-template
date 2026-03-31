@@ -2,6 +2,8 @@
 
 End-to-end guide for deploying Odoo 19.x from a fresh git clone to a running production instance on DigitalOcean. Estimated time: ~45 minutes.
 
+> Values in `{BRACES}` reference keys from `instance.conf`.
+
 ## Prerequisites
 
 Before starting, ensure you have:
@@ -110,13 +112,13 @@ The `AWS_*` variables are misleading names -- they authenticate DO Spaces (S3-co
 Before `terraform init`, the state bucket must exist. Create it manually:
 
 1. Go to [cloud.digitalocean.com/spaces](https://cloud.digitalocean.com/spaces)
-2. Create a new Space named `odoo-prod-tfstate` in the `nyc3` region
+2. Create a new Space named `{PROJECT_NAME}-tfstate` in the `nyc3` region
 3. Choose **Standard** storage tier
 4. Set access to **Restrict File Listing**
 
 Also create the backup bucket:
 
-1. Create a new Space named `odoo-prod-backups` in the `nyc3` region
+1. Create a new Space named `{PROJECT_NAME}-backups` in the `nyc3` region
 2. Choose **Cold Storage** tier (3x cheaper, suitable for infrequently accessed backups)
 3. Set access to **Restrict File Listing**
 4. **Configure a 30-day lifecycle expiration rule** to automatically delete old backups
@@ -124,7 +126,7 @@ Also create the backup bucket:
    Without this rule, `rclone copy` accumulates backups indefinitely on Spaces. On Cold Storage every object incurs a minimum 30-day storage charge regardless, so expiring at 30 days is the cost-optimal retention window.
 
    **Method A -- DO Console:**
-   - Open the `odoo-prod-backups` Space in the DigitalOcean control panel
+   - Open the `{PROJECT_NAME}-backups` Space in the DigitalOcean control panel
    - Go to **Settings** > **Lifecycle Rules**
    - Add a rule: Prefix = *(leave blank for all objects)*, Expiration = **30 days**
    - Save
@@ -151,7 +153,7 @@ Also create the backup bucket:
    ```bash
    aws s3api put-bucket-lifecycle-configuration \
      --endpoint-url https://nyc3.digitaloceanspaces.com \
-     --bucket odoo-prod-backups \
+     --bucket {PROJECT_NAME}-backups \
      --lifecycle-configuration file://lifecycle.json
    ```
 
@@ -160,7 +162,7 @@ Also create the backup bucket:
    ```bash
    aws s3api get-bucket-lifecycle-configuration \
      --endpoint-url https://nyc3.digitaloceanspaces.com \
-     --bucket odoo-prod-backups
+     --bucket {PROJECT_NAME}-backups
    ```
 
    Expected output should show the `expire-backups-30d` rule with `"Days": 30`.
@@ -191,7 +193,7 @@ Type `yes` to confirm. Note the outputs:
 
 ```
 droplet_ip       = "xxx.xxx.xxx.xxx"
-volume_mount_path = "/mnt/odoo-prod-data"
+volume_mount_path = "/mnt/{PROJECT_NAME}-data"
 spaces_endpoint   = "https://nyc3.digitaloceanspaces.com"
 ```
 
@@ -361,7 +363,7 @@ sudo /opt/odoo/scripts/06-backup-daily.sh
 cat /opt/odoo/backup-status.json
 
 # List the backup
-ls -la /mnt/odoo-prod-data/backups/daily/
+ls -la /mnt/{PROJECT_NAME}-data/backups/daily/
 ```
 
 ## Step 9: Verify Deployment
@@ -384,7 +386,7 @@ sudo certbot certificates
 docker compose -f /opt/odoo/docker-compose.yml ps
 
 # Disk usage
-df -h /mnt/odoo-prod-data/
+df -h /mnt/{PROJECT_NAME}-data/
 
 # UFW status
 sudo ufw status verbose
@@ -451,7 +453,7 @@ docker logs odoo-app
 
 # Common issues:
 # - .env file missing or wrong permissions -> chmod 600 /opt/odoo/.env
-# - Disk full -> df -h /mnt/odoo-prod-data/
+# - Disk full -> df -h /mnt/{PROJECT_NAME}-data/
 # - Port conflict -> sudo ss -tlnp | grep -E '8069|8072'
 ```
 

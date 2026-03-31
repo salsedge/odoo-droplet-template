@@ -2,6 +2,8 @@
 
 Odoo Community 19.x deployed on a single DigitalOcean droplet (Ubuntu 24.04 LTS, s-2vcpu-4gb). Containerized with Docker Compose (Odoo + PostgreSQL 18), reverse-proxied by host-installed Nginx with Let's Encrypt SSL. PCI-DSS compliant security hardening. Designed for a 10-user CRM/PM workload.
 
+> Values in `{BRACES}` reference keys from `instance.conf`.
+
 ## Network Topology (ASCII)
 
 ```
@@ -9,12 +11,12 @@ Odoo Community 19.x deployed on a single DigitalOcean droplet (Ubuntu 24.04 LTS,
                           │            DigitalOcean Cloud                 │
                           │                                               │
   ┌──────────┐            │  ┌───────────────────────────────────────┐    │
-  │ Internet │────────────┼──│     Cloud Firewall (odoo-prod-fw)    │    │
+  │ Internet │────────────┼──│  Cloud Firewall ({PROJECT_NAME}-fw)  │    │
   │ (HTTPS)  │            │  │  Inbound: 80, 443, 9292 (SSH)        │    │
   └──────────┘            │  └──────────────────┬────────────────────┘    │
                           │                     │                         │
                           │  ┌──────────────────▼────────────────────┐    │
-                          │  │  Droplet: odoo-prod-odoo              │    │
+                          │  │  Droplet: {PROJECT_NAME}-odoo         │    │
                           │  │  Ubuntu 24.04 LTS  (s-2vcpu-4gb)      │    │
                           │  │  VPC: 10.100.0.0/24                   │    │
                           │  │                                       │    │
@@ -47,7 +49,7 @@ Odoo Community 19.x deployed on a single DigitalOcean droplet (Ubuntu 24.04 LTS,
                           │  │  │  └─────────────────────────┘  │    │    │
                           │  │  └───────────────────────────────┘    │    │
                           │  │                                       │    │
-                          │  │  Block Storage: /mnt/odoo-prod-data/  │    │
+                          │  │  Block Storage: /mnt/{PROJECT_NAME}-data/  │    │
                           │  │  ├── postgres-data/                   │    │
                           │  │  ├── odoo-filestore/                  │    │
                           │  │  └── backups/                         │    │
@@ -57,9 +59,9 @@ Odoo Community 19.x deployed on a single DigitalOcean droplet (Ubuntu 24.04 LTS,
                           │                                               │
                           │  ┌───────────────────────────────────────┐    │
                           │  │ DO Spaces (S3-compatible)              │    │
-                          │  │ odoo-prod-tfstate  (Standard)         │    │
+                          │  │ {PROJECT_NAME}-tfstate  (Standard)    │    │
                           │  │   └── terraform.tfstate               │    │
-                          │  │ odoo-prod-backups  (Cold Storage)     │    │
+                          │  │ {PROJECT_NAME}-backups  (Cold Storage) │    │
                           │  │   └── YYYY/MM/odoo-*.dump             │    │
                           │  └───────────────────────────────────────┘    │
                           └───────────────────────────────────────────────┘
@@ -75,7 +77,7 @@ graph TD
     subgraph DO["DigitalOcean Cloud"]
         FW --> Droplet
 
-        subgraph Droplet["Droplet: odoo-prod-odoo<br>Ubuntu 24.04 LTS (s-2vcpu-4gb)<br>VPC: 10.100.0.0/24"]
+        subgraph Droplet["Droplet: {PROJECT_NAME}-odoo<br>Ubuntu 24.04 LTS (s-2vcpu-4gb)<br>VPC: 10.100.0.0/24"]
             Nginx["Nginx (host)<br>:80 / :443<br>TLS, HSTS, CSP"]
             UFW["UFW Firewall<br>iptables: false in Docker"]
             FB["fail2ban<br>SSH + Odoo jails"]
@@ -105,8 +107,8 @@ graph TD
         Odoo -.->|bind mount| OdooFS
 
         subgraph Spaces["DO Spaces (S3)"]
-            TFState["odoo-prod-tfstate<br>(Standard)"]
-            BackupBucket["odoo-prod-backups<br>(Cold Storage, 30-day)"]
+            TFState["{PROJECT_NAME}-tfstate<br>(Standard)"]
+            BackupBucket["{PROJECT_NAME}-backups<br>(Cold Storage, 30-day)"]
         end
 
         Backups -.->|rclone copy| BackupBucket
@@ -148,7 +150,7 @@ graph TD
 
 ### Persistent Data
 
-All persistent data lives on the Block Storage Volume mounted at `/mnt/odoo-prod-data/`:
+All persistent data lives on the Block Storage Volume mounted at `/mnt/{PROJECT_NAME}-data/`:
 
 - **PostgreSQL data** (`postgres-data/`) -- bind-mounted into the `odoo-db` container
 - **Odoo filestore** (`odoo-filestore/`) -- bind-mounted into the `odoo-app` container; stores attachments, session data
@@ -205,9 +207,9 @@ Daily automated backups protect both database and filestore:
 | Remote (DO Spaces) | Same files, Cold Storage bucket | 30 days | 3:30 AM daily (rclone copy) |
 
 - **Database:** `pg_dump -Fc` via `docker exec` into the PostgreSQL container
-- **Filestore:** `tar -czf` of `/mnt/odoo-prod-data/odoo-filestore/` (excludes sessions/addons)
+- **Filestore:** `tar -czf` of `/mnt/{PROJECT_NAME}-data/odoo-filestore/` (excludes sessions/addons)
 - **Weekly:** Sunday's daily backup promoted to `weekly/` directory
-- **Offsite:** `rclone copy` (not sync) to `odoo-prod-backups` Cold Storage bucket, organized as `YYYY/MM/`
+- **Offsite:** `rclone copy` (not sync) to `{PROJECT_NAME}-backups` Cold Storage bucket, organized as `YYYY/MM/`
 - **Status:** JSON status file at `/opt/odoo/backup-status.json` for Phase 5 Icinga2 monitoring
 - **Alerts:** Email notifications via msmtp on backup failure
 
@@ -220,36 +222,37 @@ Restore procedures and verification are documented in [docs/operations.md](opera
 │                     DigitalOcean Account                        │
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │ VPC: odoo-prod-vpc  (10.100.0.0/24)                      │   │
+│  │ VPC: {PROJECT_NAME}-vpc  (10.100.0.0/24)                 │   │
 │  │                                                           │   │
 │  │  ┌────────────────────────────────────────────────────┐   │   │
-│  │  │ Droplet: odoo-prod-odoo                            │   │   │
+│  │  │ Droplet: {PROJECT_NAME}-odoo                       │   │   │
 │  │  │ Image: Ubuntu 24.04 LTS                            │   │   │
 │  │  │ Size: s-2vcpu-4gb (2 vCPU / 4 GB RAM)             │   │   │
 │  │  │ Region: nyc3                                       │   │   │
 │  │  └────────────────────────────────────────────────────┘   │   │
 │  │                    │                                       │   │
 │  │  ┌─────────────────▼──────────────────────────────────┐   │   │
-│  │  │ Volume: odoo-prod-data (25 GB, ext4)               │   │   │
-│  │  │ Mount: /mnt/odoo-prod-data/                        │   │   │
+│  │  │ Volume: {PROJECT_NAME}-data (25 GB, ext4)          │   │   │
+│  │  │ Mount: /mnt/{PROJECT_NAME}-data/                   │   │   │
 │  │  │ Contents: postgres-data, odoo-filestore, backups   │   │   │
 │  │  └────────────────────────────────────────────────────┘   │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │  ┌──────────────────────────┐  ┌─────────────────────────────┐  │
 │  │ Cloud Firewall            │  │ Spaces Buckets               │  │
-│  │ odoo-prod-fw              │  │                              │  │
-│  │ Rules:                    │  │ odoo-prod-tfstate (Standard) │  │
-│  │  IN: 80, 443, 9292 (TCP) │  │  terraform.tfstate           │  │
-│  │  OUT: all                 │  │                              │  │
-│  │ Attached to: droplet      │  │ odoo-prod-backups (Cold)     │  │
-│  └──────────────────────────┘  │  YYYY/MM/odoo-*.dump          │  │
+│  │ {PROJECT_NAME}-fw         │  │                              │  │
+│  │ Rules:                    │  │ {PROJECT_NAME}-tfstate        │  │
+│  │  IN: 80, 443, 9292 (TCP) │  │  (Standard)                  │  │
+│  │  OUT: all                 │  │  terraform.tfstate           │  │
+│  │ Attached to: droplet      │  │                              │  │
+│  └──────────────────────────┘  │ {PROJECT_NAME}-backups (Cold) │  │
+│                                 │  YYYY/MM/odoo-*.dump          │  │
 │                                 │  30-day retention             │  │
 │                                 └─────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-All infrastructure is provisioned by Terraform (see `infra/`). State is stored remotely in the `odoo-prod-tfstate` Spaces bucket.
+All infrastructure is provisioned by Terraform (see `infra/`). State is stored remotely in the `{PROJECT_NAME}-tfstate` Spaces bucket.
 
 ---
 
