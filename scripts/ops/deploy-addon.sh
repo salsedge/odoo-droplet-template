@@ -15,7 +15,7 @@
 #   sudo bash scripts/ops/deploy-addon.sh <module-name>
 #
 # Example:
-#   sudo bash scripts/ops/deploy-addon.sh loodon_proposals
+#   sudo bash scripts/ops/deploy-addon.sh my_custom_module
 #
 # This script runs ON THE DROPLET. Use `make deploy-addon` from your local
 # machine to handle the SCP + remote execution.
@@ -87,7 +87,7 @@ echo ""
 echo "=== Module ${MODULE_NAME} deployed ==="
 echo ""
 echo "Next steps — install via Odoo UI:"
-echo "  1. Log in to https://portal.loodon.com/web"
+echo "  1. Log in to your Odoo instance at https://<your-domain>/web"
 echo "  2. Settings -> Developer Tools -> Activate Developer Mode"
 echo "  3. Apps -> Update Apps List -> Update"
 echo "  4. Search for '${MODULE_NAME}' -> Install"

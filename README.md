@@ -163,4 +163,4 @@ This destroys all DigitalOcean resources created by Terraform (droplet, volume, 
 
 ## License
 
-Private — SALS Edge / Bibbeo Infrastructure
+Private

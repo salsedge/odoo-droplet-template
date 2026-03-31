@@ -27,8 +27,8 @@
 #   sudo bash scripts/ops/set-domain.sh <primary-domain> <cert-email> [alias-domain]
 #
 # Examples:
-#   sudo bash scripts/ops/set-domain.sh portal.loodon.com admin@loodon.com odoo.loodon.com
-#   sudo bash scripts/ops/set-domain.sh portal.loodon.com admin@loodon.com
+#   sudo bash scripts/ops/set-domain.sh portal.example.com admin@example.com odoo.example.com
+#   sudo bash scripts/ops/set-domain.sh portal.example.com admin@example.com
 #
 # Idempotent: safe to re-run. Skips Odoo restart if web.base.url already correct.
 # =============================================================================
@@ -73,7 +73,7 @@ trap cleanup ERR
 if [[ $# -lt 2 ]]; then
   echo "Usage: $0 <primary-domain> <cert-email> [alias-domain]" >&2
   echo "" >&2
-  echo "  primary-domain  FQDN for the Odoo instance (e.g., portal.loodon.com)" >&2
+  echo "  primary-domain  FQDN for the Odoo instance (e.g., portal.example.com)" >&2
   echo "  cert-email      Email for Let's Encrypt notifications" >&2
   echo "  alias-domain    Optional old domain that 301-redirects to primary" >&2
   exit 1

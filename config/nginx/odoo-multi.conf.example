@@ -5,7 +5,7 @@
 # Requirements: PROXY-01, PROXY-03, PROXY-04
 #
 # Template placeholders (replaced by scripts/ops/set-domain.sh):
-#   PRIMARY_DOMAIN  — primary FQDN serving Odoo (e.g., portal.loodon.com)
+#   PRIMARY_DOMAIN  — primary FQDN serving Odoo (e.g., portal.example.com)
 #   ALIAS_DOMAIN    — old/alias FQDN that 301-redirects to primary
 #   CERT_NAME       — certbot certificate name (directory under /etc/letsencrypt/live/)
 #

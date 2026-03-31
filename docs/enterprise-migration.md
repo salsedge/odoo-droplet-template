@@ -48,7 +48,7 @@ sudo /opt/odoo/scripts/07-sync-offsite.sh
 Verify the remote backup:
 
 ```bash
-rclone ls --config /opt/odoo/rclone.conf spaces:odoo-prod-backups/$(date +%Y)/$(date +%m)/ | grep "$(date +%Y-%m-%d)"
+rclone ls --config /opt/odoo/rclone.conf spaces:{PROJECT_NAME}-backups/$(date +%Y)/$(date +%m)/ | grep "$(date +%Y-%m-%d)"
 ```
 
 ### 4. Record the current state
@@ -101,7 +101,7 @@ Add the enterprise addons bind mount to the Odoo service:
 ```yaml
 # In /opt/odoo/docker-compose.yml, under the odoo service volumes:
 volumes:
-  - /mnt/odoo-prod-data/odoo-filestore:/var/lib/odoo
+  - /mnt/{PROJECT_NAME}-data/odoo-filestore:/var/lib/odoo
   - ./odoo.conf:/etc/odoo/odoo.conf:ro
   - ./enterprise:/mnt/extra-addons:ro    # <-- ADD THIS LINE
 ```
@@ -210,7 +210,7 @@ If Enterprise modules have created new records, changed schemas, or modified exi
 
 ```bash
 # Full production restore from the backup taken before migration
-sudo bash /opt/odoo/scripts/08-restore-backup.sh --production --file /mnt/odoo-prod-data/backups/daily/odoo-db-<DATE>.dump
+sudo bash /opt/odoo/scripts/08-restore-backup.sh --production --file /mnt/{PROJECT_NAME}-data/backups/daily/odoo-db-<DATE>.dump
 
 # Also revert docker-compose.yml and odoo.conf as described in Quick Rollback above
 ```

@@ -30,7 +30,7 @@ Architectural and implementation decisions made during the project, with rationa
 |----------|-----------|
 | Flat Terraform layout | Single file per concern in `infra/`, no modules. Right-sized for single-droplet. |
 | Separate `volume_attachment` resource | Not inline `volume_ids` on droplet — prevents destroy-ordering issues in Terraform. |
-| Two Spaces buckets | `odoo-prod-tfstate` (Standard) for TF state, `odoo-prod-backups` (Cold Storage) for backups. Cold is 3× cheaper but has 30-day retention + retrieval fees. |
+| Two Spaces buckets | `{PROJECT_NAME}-tfstate` (Standard) for TF state, `{PROJECT_NAME}-backups` (Cold Storage) for backups. Cold is 3× cheaper but has 30-day retention + retrieval fees. |
 | Remote-exec for bootstrap only | Verifies SSH and block device; mount verification deferred to post-attachment. |
 
 ## Deployment
