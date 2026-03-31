@@ -103,8 +103,8 @@ object CheckCommand "postgres-health" {
 
   // Defaults — override via host or service custom vars
   vars.postgres_health_container = "odoo-db"
-  vars.postgres_health_user = "loomin"
-  vars.postgres_health_db = "loodon-01"
+  vars.postgres_health_user = "DB_USER_PLACEHOLDER"
+  vars.postgres_health_db = "DB_NAME_PLACEHOLDER"
   vars.postgres_health_warn_conn = 35
   vars.postgres_health_crit_conn = 45
   vars.postgres_health_warn_size = 5368709120      // 5 GB
