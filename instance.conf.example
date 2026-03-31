@@ -1,0 +1,45 @@
+# =============================================================================
+# Instance Configuration — Odoo Droplet Template
+# =============================================================================
+# This file defines all instance-specific values for a deployment.
+# Copy to instance.conf and customize, or run `make init` for interactive setup.
+#
+# Defaults below produce a working demo/dev instance.
+# =============================================================================
+
+# --- Project Identity ---
+PROJECT_NAME="odoo-demo"
+ORGANIZATION="Acme Corp"
+
+# --- Domain Configuration ---
+DOMAIN_MODE="single"              # "single" or "multi"
+PRIMARY_DOMAIN="odoo.example.com"
+ALIAS_DOMAINS=""                  # Comma-separated, only used if DOMAIN_MODE=multi
+ADMIN_EMAIL="admin@example.com"   # Let's Encrypt + Odoo admin notifications
+
+# --- DigitalOcean Infrastructure ---
+DO_REGION="nyc3"
+DROPLET_SIZE="s-2vcpu-4gb"
+VOLUME_SIZE_GB="25"
+SSH_KEY_FINGERPRINT=""            # Leave blank to upload ~/.ssh/id_ed25519.pub
+SSH_PORT="9292"
+
+# --- Database ---
+DB_NAME="odoo-01"
+DB_USER="odoo"
+
+# --- Spaces (Object Storage) ---
+TFSTATE_BUCKET="${PROJECT_NAME}-tfstate"
+BACKUP_BUCKET="${PROJECT_NAME}-backups"
+SPACES_REGION="${DO_REGION}"
+
+# --- Backup ---
+BACKUP_RETENTION_DAYS="30"
+BACKUP_NOTIFY_EMAIL="${ADMIN_EMAIL}"
+
+# --- Monitoring (optional) ---
+ICINGA2_ENABLED="false"
+ICINGA2_MASTER=""                 # Hostname of Icinga2 master
+
+# --- OdooKit (optional) ---
+ODOOKIT_REPO="https://github.com/salsedge/odookit"
