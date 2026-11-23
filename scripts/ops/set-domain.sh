@@ -41,7 +41,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="${CONFIG_DIR:-$(dirname "$(dirname "$SCRIPT_DIR")")/config}"
 CERTBOT_WEBROOT="/var/www/certbot"
-NGINX_CONF="/etc/nginx/sites-available/odoo.conf"
+# conf.d: the nginx.org package does not read sites-available/sites-enabled
+NGINX_CONF="/etc/nginx/conf.d/odoo.conf"
 NGINX_BACKUP=""
 ODOO_ENV="/opt/odoo/.env"
 TOTAL_STEPS=7
@@ -60,7 +61,7 @@ cleanup() {
       echo "  Previous Nginx config restored and reloaded."
     else
       echo "  WARNING: Could not restore Nginx config. Manual intervention required."
-      echo "  Check: /etc/nginx/sites-available/odoo.conf"
+      echo "  Check: ${NGINX_CONF}"
     fi
   fi
   exit "$exit_code"

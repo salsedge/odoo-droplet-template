@@ -122,7 +122,7 @@ graph TD
 
 | Component | Location | Port(s) | Purpose | Key Config |
 |-----------|----------|---------|---------|------------|
-| Nginx | Host | 80, 443 | Reverse proxy, TLS termination, security headers | `/etc/nginx/sites-available/odoo` |
+| Nginx | Host | 80, 443 | Reverse proxy, TLS termination, security headers | `/etc/nginx/conf.d/odoo.conf` (nginx.org stable package) |
 | Odoo 19 | Container (`odoo-app`) | 127.0.0.1:8069 (HTTP), 127.0.0.1:8072 (WebSocket) | ERP application (CRM, Project) | `/opt/odoo/odoo.conf` |
 | PostgreSQL 18 | Container (`odoo-db`) | 5432 (backend network only) | Relational database | `/opt/odoo/postgresql.conf` |
 | Docker CE | Host | -- | Container runtime | `/etc/docker/daemon.json` (`iptables: false`, log rotation) |
