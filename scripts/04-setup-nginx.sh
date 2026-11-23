@@ -85,6 +85,18 @@ fi
 # =============================================================================
 echo "--- Installing Nginx and Certbot (PROXY-01, PROXY-02) ---"
 
+# Refuse before any apt change: swapping to the nginx.org package removes Ubuntu's
+# libnginx-mod-* dynamic modules, and anything that loads them would break with
+# the old service already stopped. Migrate them deliberately first.
+INSTALLED_NGINX_MODS="$(dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'libnginx-mod-*' 2>/dev/null \
+  | awk '$1 == "ii" { print $2 }' || true)"
+if [[ -n "${INSTALLED_NGINX_MODS}" ]]; then
+  echo "ERROR: Ubuntu nginx dynamic modules are installed; the nginx.org swap would remove them:" >&2
+  while IFS= read -r mod; do echo "  ${mod}" >&2; done <<< "${INSTALLED_NGINX_MODS}"
+  echo "  No apt changes made. Migrate or remove these modules deliberately, then re-run." >&2
+  exit 1
+fi
+
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
 apt-get install -y -q curl gnupg2 ca-certificates lsb-release ubuntu-keyring
