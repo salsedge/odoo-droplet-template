@@ -4,7 +4,7 @@
 # =============================================================================
 # Requirements: PROXY-01, PROXY-02, PROXY-03, PROXY-04, PROXY-05
 #
-# Installs Nginx, obtains SSL certificate via certbot HTTP-01 challenge,
+# Installs Nginx (nginx.org stable repo), obtains SSL certificate via certbot HTTP-01 challenge,
 # and configures the full reverse proxy with security headers.
 #
 # Prerequisites:
@@ -22,6 +22,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="${CONFIG_DIR:-$(dirname "$SCRIPT_DIR")/config}"
 CERTBOT_WEBROOT="/var/www/certbot"
+
+# nginx.org package layout: no sites-available/sites-enabled; nginx.conf only
+# includes conf.d/*.conf, so the site config must live there to be loaded.
+NGINX_SITE_CONF="/etc/nginx/conf.d/odoo.conf"
+NGINX_MIN_VERSION="1.30.7"
+NGINX_KEYRING="/usr/share/keyrings/nginx-archive-keyring.gpg"
+# Published at https://nginx.org/en/linux_packages.html
+NGINX_KEY_FINGERPRINT="573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62"
 
 # =============================================================================
 # Argument parsing
@@ -47,7 +55,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Verify config files exist
-for f in nginx/odoo-pre-ssl.conf nginx/odoo.conf; do
+for f in nginx/odoo-pre-ssl.conf nginx/odoo.conf nginx/nginx-restart-if-upgraded \
+  apt/52unattended-upgrades-nginx-org apt/99nginx-restart-if-upgraded; do
   if [[ ! -f "${CONFIG_DIR}/${f}" ]]; then
     echo "ERROR: Missing config file: ${CONFIG_DIR}/${f}" >&2
     exit 1
@@ -77,9 +86,76 @@ fi
 # =============================================================================
 echo "--- Installing Nginx and Certbot (PROXY-01, PROXY-02) ---"
 
+# Refuse before any apt change: swapping to the nginx.org package removes Ubuntu's
+# libnginx-mod-* dynamic modules, and anything that loads them would break with
+# the old service already stopped. Migrate them deliberately first.
+INSTALLED_NGINX_MODS="$(dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'libnginx-mod-*' 2>/dev/null \
+  | awk '$1 == "ii" { print $2 }' || true)"
+if [[ -n "${INSTALLED_NGINX_MODS}" ]]; then
+  echo "ERROR: Ubuntu nginx dynamic modules are installed; the nginx.org swap would remove them:" >&2
+  while IFS= read -r mod; do echo "  ${mod}" >&2; done <<< "${INSTALLED_NGINX_MODS}"
+  echo "  No apt changes made. Migrate or remove these modules deliberately, then re-run." >&2
+  exit 1
+fi
+
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
-apt-get install -y -q nginx certbot python3-certbot-nginx
+apt-get install -y -q curl gnupg2 ca-certificates lsb-release ubuntu-keyring
+
+# nginx comes from the nginx.org stable repo, not the Ubuntu archive: the distro
+# package lags upstream security fixes (CVE-2026-123007, HTTP/2, fixed in 1.30.7).
+# Steps follow https://nginx.org/en/linux_packages.html (Ubuntu section).
+echo "--- Configuring nginx.org stable apt repository ---"
+
+KEY_TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "${KEY_TMP_DIR}"' EXIT
+
+curl -fsSL https://nginx.org/keys/nginx_signing.key \
+  | gpg --dearmor > "${KEY_TMP_DIR}/nginx-archive-keyring.gpg"
+
+# Fail closed: only install the keyring if it carries the fingerprint published
+# on nginx.org. The file may hold other nginx signing keys too (expected).
+if ! GNUPGHOME="${KEY_TMP_DIR}" gpg --dry-run --quiet --no-keyring --import \
+    --import-options import-show --with-colons "${KEY_TMP_DIR}/nginx-archive-keyring.gpg" \
+    | awk -F: '$1 == "fpr" { print $10 }' | grep -x "${NGINX_KEY_FINGERPRINT}" >/dev/null; then
+  echo "ERROR: nginx signing key fingerprint mismatch (expected ${NGINX_KEY_FINGERPRINT})" >&2
+  exit 1
+fi
+install -m 0644 "${KEY_TMP_DIR}/nginx-archive-keyring.gpg" "${NGINX_KEYRING}"
+
+echo "deb [signed-by=${NGINX_KEYRING}] https://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" \
+  > /etc/apt/sources.list.d/nginx.list
+
+# Pin so the Ubuntu nginx package can never win over nginx.org's
+printf 'Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n' \
+  > /etc/apt/preferences.d/99nginx
+
+apt-get update -q
+# --force-confnew: on a box that already had Ubuntu's nginx, take nginx.org's
+# nginx.conf so the layout matches a fresh install (conf.d only, user nginx).
+apt-get install -y -q -o Dpkg::Options::=--force-confnew \
+  nginx certbot python3-certbot-nginx
+
+# Assert the version floor: the CVE fix is the whole point of this step
+NGINX_VERSION="$(nginx -v 2>&1 | sed -n 's|^nginx version: nginx/\([0-9.]*\).*|\1|p')"
+if [[ -z "${NGINX_VERSION}" ]] \
+  || [[ "$(printf '%s\n%s\n' "${NGINX_MIN_VERSION}" "${NGINX_VERSION}" | sort -V | head -1)" != "${NGINX_MIN_VERSION}" ]]; then
+  echo "ERROR: nginx ${NGINX_VERSION:-unknown} is below required ${NGINX_MIN_VERSION}" >&2
+  exit 1
+fi
+echo "nginx ${NGINX_VERSION} installed (>= ${NGINX_MIN_VERSION})"
+
+# Keep it patched: unattended-upgrades only trusts Ubuntu origins by default. The
+# hook restarts nginx when an upgrade replaced the binary but the package's own
+# live swap failed (old vulnerable master still serving). Installed after the
+# package swap so the hook cannot fire mid-migration from Ubuntu's nginx.
+echo "--- Enabling nginx.org unattended upgrades + restart-on-upgrade hook ---"
+install -m 0644 "${CONFIG_DIR}/apt/52unattended-upgrades-nginx-org" \
+  /etc/apt/apt.conf.d/52unattended-upgrades-nginx-org
+install -m 0755 "${CONFIG_DIR}/nginx/nginx-restart-if-upgraded" \
+  /usr/local/sbin/nginx-restart-if-upgraded
+install -m 0644 "${CONFIG_DIR}/apt/99nginx-restart-if-upgraded" \
+  /etc/apt/apt.conf.d/99nginx-restart-if-upgraded
 
 # Stop Nginx during initial config
 systemctl stop nginx
@@ -92,17 +168,19 @@ echo "--- Deploying pre-SSL Nginx config ---"
 # Create certbot webroot
 mkdir -p "${CERTBOT_WEBROOT}"
 
-# Remove default site
-rm -f /etc/nginx/sites-enabled/default
+# Remove the stock default site so it cannot compete for default_server
+rm -f /etc/nginx/conf.d/default.conf
+
+# Boxes first built with Ubuntu's nginx: drop the old sites-enabled links so the
+# site is not loaded twice (duplicate upstream) if an old nginx.conf survived.
+rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/odoo.conf
 
 # Deploy pre-SSL config with domain substituted
 sed "s/DOMAIN_PLACEHOLDER/${DOMAIN}/g" "${CONFIG_DIR}/nginx/odoo-pre-ssl.conf" \
-  > /etc/nginx/sites-available/odoo.conf
-
-ln -sf /etc/nginx/sites-available/odoo.conf /etc/nginx/sites-enabled/odoo.conf
+  > "${NGINX_SITE_CONF}"
 
 # Set permissions (HARD-06)
-chmod 644 /etc/nginx/sites-available/odoo.conf
+chmod 644 "${NGINX_SITE_CONF}"
 
 # Test and start Nginx
 nginx -t
@@ -140,10 +218,10 @@ echo "--- Deploying full SSL Nginx config (PROXY-01, PROXY-03, PROXY-04) ---"
 
 # Substitute domain placeholder in the full SSL config
 sed "s/DOMAIN_PLACEHOLDER/${DOMAIN}/g" "${CONFIG_DIR}/nginx/odoo.conf" \
-  > /etc/nginx/sites-available/odoo.conf
+  > "${NGINX_SITE_CONF}"
 
 # Set permissions (HARD-06)
-chmod 644 /etc/nginx/sites-available/odoo.conf
+chmod 644 "${NGINX_SITE_CONF}"
 
 # Test and reload Nginx
 nginx -t

@@ -1,0 +1,9 @@
+// Installed by scripts/04-setup-nginx.sh.
+// Let unattended-upgrades install nginx.org stable releases (security fixes such
+// as CVE-2026-123007 ship there, not in the Ubuntu archive). Fields match
+// https://nginx.org/packages/ubuntu/dists/<codename>/Release:
+//   Origin: nginx / Label: nginx / Suite: stable / Codename: <codename>
+// Kept as a drop-in so 50unattended-upgrades (01-harden-host.sh) stays untouched.
+Unattended-Upgrade::Origins-Pattern {
+    "origin=nginx,label=nginx,archive=stable,codename=${distro_codename}";
+};
