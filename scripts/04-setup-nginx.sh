@@ -55,7 +55,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Verify config files exist
-for f in nginx/odoo-pre-ssl.conf nginx/odoo.conf; do
+for f in nginx/odoo-pre-ssl.conf nginx/odoo.conf nginx/nginx-restart-if-upgraded \
+  apt/52unattended-upgrades-nginx-org apt/99nginx-restart-if-upgraded; do
   if [[ ! -f "${CONFIG_DIR}/${f}" ]]; then
     echo "ERROR: Missing config file: ${CONFIG_DIR}/${f}" >&2
     exit 1
@@ -143,6 +144,18 @@ if [[ -z "${NGINX_VERSION}" ]] \
   exit 1
 fi
 echo "nginx ${NGINX_VERSION} installed (>= ${NGINX_MIN_VERSION})"
+
+# Keep it patched: unattended-upgrades only trusts Ubuntu origins by default. The
+# hook restarts nginx when an upgrade replaced the binary but the package's own
+# live swap failed (old vulnerable master still serving). Installed after the
+# package swap so the hook cannot fire mid-migration from Ubuntu's nginx.
+echo "--- Enabling nginx.org unattended upgrades + restart-on-upgrade hook ---"
+install -m 0644 "${CONFIG_DIR}/apt/52unattended-upgrades-nginx-org" \
+  /etc/apt/apt.conf.d/52unattended-upgrades-nginx-org
+install -m 0755 "${CONFIG_DIR}/nginx/nginx-restart-if-upgraded" \
+  /usr/local/sbin/nginx-restart-if-upgraded
+install -m 0644 "${CONFIG_DIR}/apt/99nginx-restart-if-upgraded" \
+  /etc/apt/apt.conf.d/99nginx-restart-if-upgraded
 
 # Stop Nginx during initial config
 systemctl stop nginx

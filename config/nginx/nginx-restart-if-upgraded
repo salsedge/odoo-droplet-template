@@ -1,0 +1,51 @@
+#!/bin/sh
+# =============================================================================
+# nginx-restart-if-upgraded — apt DPkg::Post-Invoke hook
+# =============================================================================
+# Installed to /usr/local/sbin by scripts/04-setup-nginx.sh and called from
+# /etc/apt/apt.conf.d/99nginx-restart-if-upgraded after every dpkg run.
+#
+# The nginx.org postinst live-swaps the binary (init.d "upgrade"), but when that
+# fails it only prints "Binary upgrade failed" and apt still exits 0, leaving the
+# old, possibly vulnerable master serving a deleted binary. This is the net:
+# restart only when the running master's binary is no longer the one on disk,
+# and only if the config passes nginx -t. Always exits 0 so apt never wedges.
+# =============================================================================
+
+TAG="nginx-restart-if-upgraded"
+BIN="/usr/sbin/nginx"
+
+# No-op unless nginx is installed and running under systemd
+[ -x "$BIN" ] || exit 0
+command -v systemctl >/dev/null 2>&1 || exit 0
+pid="$(systemctl show -p MainPID --value nginx 2>/dev/null)"
+[ -n "$pid" ] && [ "$pid" != "0" ] || exit 0
+exe="$(readlink "/proc/${pid}/exe" 2>/dev/null)" || exit 0
+
+# dpkg installs the new binary by rename, so the running one shows "(deleted)";
+# the dev:inode comparison also catches a replaced file that was not unlinked.
+changed="no"
+case "$exe" in
+  *" (deleted)") changed="yes" ;;
+esac
+if [ "$changed" = "no" ]; then
+  run_ino="$(stat -L -c %d:%i "/proc/${pid}/exe" 2>/dev/null)"
+  disk_ino="$(stat -L -c %d:%i "$BIN" 2>/dev/null)"
+  if [ -n "$run_ino" ] && [ -n "$disk_ino" ] && [ "$run_ino" != "$disk_ino" ]; then
+    changed="yes"
+  fi
+fi
+[ "$changed" = "yes" ] || exit 0
+
+if out="$("$BIN" -t 2>&1)"; then
+  if systemctl restart nginx; then
+    logger -t "$TAG" "nginx binary replaced on disk; restarted nginx (old master pid ${pid})"
+  else
+    logger -p daemon.err -t "$TAG" "nginx binary replaced on disk; systemctl restart nginx FAILED"
+    echo "${TAG}: systemctl restart nginx failed; see journalctl -t ${TAG}" >&2
+  fi
+else
+  logger -p daemon.err -t "$TAG" "nginx binary replaced on disk but nginx -t failed; NOT restarting, old binary still serving: ${out}"
+  echo "${TAG}: nginx -t failed, NOT restarting; old nginx binary still serving; see journalctl -t ${TAG}" >&2
+fi
+exit 0

@@ -1,0 +1,5 @@
+// Installed by scripts/04-setup-nginx.sh.
+// dpkg replaces the nginx binary on upgrade but nothing restarts the service, so
+// the old master would keep serving. The helper restarts nginx only when the
+// running binary was replaced, only if nginx -t passes, and always exits 0.
+DPkg::Post-Invoke { "if [ -x /usr/local/sbin/nginx-restart-if-upgraded ]; then /usr/local/sbin/nginx-restart-if-upgraded || true; fi"; };
